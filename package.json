@@ -8,7 +8,7 @@
     "client": "cd client && npm run dev",
     "build": "cd client && npm run build",
     "start": "cd server && npm run start",
-    "render-build": "npm install && cd client && npm install && npm run build && cd ../server && npm install",
+    "render-build": "npm install && cd client && npm install --include=dev && npm run build && cd ../server && npm install",
     "install-all": "npm install && cd server && npm install && cd ../client && npm install"
   },
   "devDependencies": {
