@@ -18,7 +18,7 @@ const httpServer = createServer(app);
 const io = new SocketIOServer(httpServer, {
   cors: {
     origin: process.env.NODE_ENV === 'production' 
-      ? false 
+      ? (process.env.CLIENT_URL || true)  // In production, allow same-origin or explicit CLIENT_URL
       : ['http://localhost:3000', 'http://localhost:5173'],
     methods: ['GET', 'POST'],
     credentials: true,

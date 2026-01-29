@@ -3,7 +3,9 @@ import { io } from 'socket.io-client';
 import Lobby from './components/Lobby';
 import GameBoard from './components/GameBoard';
 
-const SERVER_URL = import.meta.env.VITE_SERVER_URL || 'http://localhost:8000';
+// In production (on Render), client and server are on the same origin, so use empty string
+// In development, use localhost:8000
+const SERVER_URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? '' : 'http://localhost:8000');
 
 function App() {
   const [socket, setSocket] = useState(null);

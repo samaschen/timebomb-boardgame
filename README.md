@@ -1,10 +1,10 @@
 # Time Bomb Board Game
 
-A browser-based, real-time multiplayer game inspired by Time Bomb. Players join via room code, receive hidden roles, and work together (or against each other) to find defusing wires while avoiding the bomb.
+A browser-based, real-time multiplayer deduction game. Players join via room code, receive hidden roles (Good Team or Bad Team), and work together—or secretly sabotage—to find defusing wires while avoiding the bomb.
 
 ## Features
 
-- **Real-time multiplayer** using WebSockets via Socket.io
+- **Real-time multiplayer** using WebSockets via Socket.IO
 - **Server-authoritative** game logic prevents cheating
 - **Hidden information** - roles and cards are only visible to the appropriate players
 - **No authentication required** - join with just a name and room code
@@ -13,250 +13,260 @@ A browser-based, real-time multiplayer game inspired by Time Bomb. Players join 
 
 ## Architecture
 
-- **Backend**: Node.js server with Socket.io for real-time communication
+- **Backend**: Node.js + Express server with Socket.IO for real-time communication
 - **Frontend**: React with Vite bundler
-- **Multiplayer**: WebSocket-based real-time synchronization via Socket.io
-- **Game Logic**: Custom server-side state management
+- **Multiplayer**: WebSocket-based real-time synchronization
+- **Game Logic**: Custom server-side state management (`gameManager.js`)
 - **No database**: All game state is in-memory (games reset on server restart)
 
-## Installation
+---
+
+## Local Development
 
 ### Prerequisites
 
-- Node.js (v16 or higher)
+- Node.js (v18 or higher recommended)
 - npm
 
-### Setup
+### Installation
 
-1. Install all dependencies:
+1. **Clone the repository**:
+```bash
+git clone https://github.com/your-username/timebomb-boardgame.git
+cd timebomb-boardgame
+```
+
+2. **Install all dependencies** (root, server, and client):
 ```bash
 npm run install-all
 ```
 
-This will install dependencies for:
-- Root project (concurrently for running both servers)
-- Server (socket.io, express, cors)
-- Client (React, Vite, socket.io-client)
+### Running in Development Mode
 
-## Running Locally
-
-### Development Mode
-
-Run both server and client in development mode:
+Start both the backend and frontend simultaneously:
 
 ```bash
 npm run dev
 ```
 
-This will start:
-- **Backend server** on `http://localhost:8000` (Socket.io server)
-- **Frontend client** on `http://localhost:3000` (Vite dev server)
+This launches:
+- **Backend server** on `http://localhost:8000` (Socket.IO + Express)
+- **Frontend client** on `http://localhost:3000` (Vite dev server with hot reload)
 
 Open `http://localhost:3000` in your browser to play.
 
-**Note**: The frontend connects to the backend via Socket.io WebSocket connection. Make sure both servers are running.
+### Testing Production Build Locally
 
-### Production Build
-
-A production build compiles your React frontend into optimized static files and serves them from the same server as your backend. This is useful for deployment or testing the final version locally.
-
-#### Steps to Create a Production Build:
-
-1. **Build the client** (compiles React app into static HTML/CSS/JS files):
+1. **Build the client**:
 ```bash
 npm run build
 ```
-This creates a `client/dist` folder with all the compiled frontend files.
 
 2. **Start the production server**:
 ```bash
-cd server
-npm start
+NODE_ENV=production npm run start
 ```
-This starts the server in production mode, which will:
-- Run the backend game server on `http://localhost:8000`
-- Serve the compiled frontend files from the same URL
 
-3. **Access the game**:
-   - Open your browser and go to: **`http://localhost:8000`**
-   - This is the **only URL you need** - both frontend and backend are served from the same port
-   - The server automatically serves the React app when you visit the root URL
+3. **Open** `http://localhost:8000` — both frontend and backend are served from this single URL.
 
-#### Key Differences: Development vs Production
+---
 
-| Aspect | Development Mode | Production Build |
-|--------|-----------------|------------------|
-| **Frontend URL** | `http://localhost:3000` | `http://localhost:8000` |
-| **Backend URL** | `http://localhost:8000` | `http://localhost:8000` |
-| **How to Start** | `npm run dev` (starts both) | `npm run build` then `cd server && npm start` |
-| **File Serving** | Vite dev server (port 3000) | Express serves static files (port 8000) |
-| **Hot Reload** | ✅ Yes (auto-refresh on changes) | ❌ No (must rebuild) |
-| **Code Optimization** | ❌ No (development mode) | ✅ Yes (minified, optimized) |
-| **Use Case** | Development & testing | Deployment & final testing |
+## Deployment (Render)
 
-#### Production Deployment
+This project is designed to deploy as a **single service** on [Render](https://render.com), where the Node.js server serves both the API (Socket.IO) and the built React frontend.
 
-For deploying to a live server (Heroku, Vercel, AWS, etc.):
+### Step-by-step
 
-1. **Build the client**: `npm run build`
-2. **Deploy the entire project** (both `server/` and `client/dist/`)
-3. **Set environment variables**:
-   - `NODE_ENV=production`
-   - `PORT=8000` (or your server's port)
-4. **Start the server**: The server will automatically serve the built frontend files
-5. **Access via your domain**: e.g., `https://yourgame.com` (all traffic goes to port 8000)
+1. **Push your code to GitHub**
 
-**Important**: In production, make sure to update the `multiplayer: { server: 'http://localhost:8000' }` in `client/src/App.jsx` to point to your production server URL (e.g., `https://api.yourgame.com` or your server's public URL).
+2. **Create a Render account** at [render.com](https://render.com) (GitHub login works)
+
+3. **Create a new Web Service**:
+   - Click **"New +"** → **"Web Service"**
+   - Connect your GitHub repository
+
+4. **Configure the service**:
+
+   | Setting | Value |
+   |---------|-------|
+   | **Name** | `timebomb-game` (or any name) |
+   | **Branch** | `main` |
+   | **Root Directory** | *(leave empty)* |
+   | **Runtime** | `Node` |
+   | **Build Command** | `npm run render-build` |
+   | **Start Command** | `npm run start` |
+   | **Instance Type** | `Free` (or paid for always-on) |
+
+5. **Add Environment Variable**:
+   - **Key:** `NODE_ENV`
+   - **Value:** `production`
+
+6. **Deploy** — Render will build and start your app. You'll get a URL like:
+   ```
+   https://timebomb-game.onrender.com
+   ```
+
+### Free Tier Note
+
+Render's free tier spins down after 15 minutes of inactivity. The first request after idle takes ~30 seconds to "wake up". Upgrade to a paid plan ($7/month) if this is an issue.
+
+---
 
 ## How to Play
 
-### Creating a Room
+### Overview
 
-1. Enter your display name
-2. Leave the room code field empty
-3. Click "Create Room"
-4. Share the room link with other players
+Time Bomb is a social deduction game where players are secretly divided into two teams:
+- **Good Team (SWAT)**: Find all the defusing wires before time runs out
+- **Bad Team (Terrorists)**: Prevent the Good Team from winning, ideally by triggering the bomb
 
-### Joining a Room
+Players don't know each other's roles. Each round, players take turns cutting wires from other players' hands. Communication, bluffing, and deduction are key!
 
-1. Enter your display name
-2. Enter the room code (or use a shared link)
-3. Click "Join Room"
+### Game Flow
 
-### Lobby Phase
+#### 1. Create or Join a Room
+- **Create**: Enter your name, leave room code empty, click "Create Room"
+- **Join**: Enter your name and the room code (or use a shared link)
+- Share the room code with friends (4-8 players required)
 
-- Wait for 4-8 players to join
-- Click "READY" when you're ready to start
-- The host (room creator) can start the game once all players are ready
+#### 2. Lobby
+- All players click **"Click to Ready"** when ready
+- The host (room creator) clicks **"Start Game"** once everyone is ready
 
-### Setup Phase
+#### 3. Setup Phase (each round)
+- View your **secret role** (Good Team or Bad Team)
+- View your **wire cards** (5 cards in Round 1, then 4, 3, 2 in subsequent rounds)
+- **Claim** how many defusing wires you have (you can lie!)
+- Click **"Ready for Turn"** when done
+- Host clicks **"Start Turn"** to begin the round
 
-- View your role (Good Team or Bad Team)
-- View your 5 wire cards
-- Click "I've Viewed My Wires" to shuffle them face-down
-- The host starts the game when everyone is ready
+#### 4. Playing Phase
+Players take turns in a randomized order. On your turn:
+1. Choose another player's face-down card to **cut**
+2. Confirm your choice in the popup
+3. The wire is revealed to everyone:
+   - **Safe wire**: Nothing happens, next player's turn
+   - **Defusing wire**: Added to the "Defusing wires found" section (progress toward Good Team win)
+   - **Bomb**: Game ends immediately — **Bad Team wins!**
 
-### Playing Phase
+After all players have taken one turn, the round ends.
 
-Each round consists of:
+#### 5. Between Rounds
+- All **face-down** cards are collected and reshuffled
+- Already-revealed defusing wires are **permanently removed** (they count toward the win condition)
+- The **bomb** stays in the deck if not yet revealed
+- Each player receives **one fewer card** than the previous round
+- Players re-enter their claims for the new round
+- A new random turn order is generated
 
-1. **Claim Phase**: All players claim how many defusing wires they have (you can lie!)
-2. **Turn Phase**: Players take turns selecting a wire from another player
-   - **Defusing wire**: Added to the middle (visible to all)
-   - **Safe wire**: Discarded
-   - **Bomb**: Game ends immediately - Bad Team wins!
+#### 6. Win Conditions
+| Winner | Condition |
+|--------|-----------|
+| **Good Team** | All defusing wires (equal to player count) are revealed |
+| **Bad Team** | The bomb is revealed, OR Round 4 ends without all defusing wires found |
 
-### Win Conditions
+### Strategy Tips
 
-- **Good Team wins**: All defusing wires are revealed
-- **Bad Team wins**: 
-  - Bomb is revealed, OR
-  - Round 4 ends without all defusing wires revealed
+- **Good Team**: Share information honestly, identify suspicious players, and coordinate to find defusing wires quickly
+- **Bad Team**: Blend in, mislead others, protect the bomb, and stall until Round 4
+- **Claims are public but unverified** — use them to deduce who's lying
+- **Watch the turn order** — Bad Team members may try to cut "safe" cards to avoid progress
 
-## Game Rules
+---
+
+## Game Rules Reference
 
 ### Role Distribution
 
-- **4 players**: 3 Good / 1 Bad OR 2 Good / 2 Bad (random)
-- **5 players**: 3 Good / 2 Bad
-- **6 players**: 4 Good / 2 Bad
-- **7 players**: 4 Good / 3 Bad OR 5 Good / 2 Bad (random)
-- **8 players**: 5 Good / 3 Bad
+| Players | Good Team | Bad Team |
+|---------|-----------|----------|
+| 4 | 3 or 2 | 1 or 2 (random) |
+| 5 | 3 | 2 |
+| 6 | 4 | 2 |
+| 7 | 4 or 5 | 3 or 2 (random) |
+| 8 | 5 | 3 |
 
-### Wire Deck
+### Wire Deck Composition
 
-- X defusing wires (X = number of players)
-- 1 bomb
-- 4*X - 1 safe wires
+For X players:
+- **X** defusing wires
+- **1** bomb
+- **4X - X - 1** = **3X - 1** safe wires
+- **Total**: 4X cards
 
-### Rounds
+### Cards Per Player Per Round
 
-- Each player gets exactly 1 turn per round
-- At the end of each round, all unrevealed wires are collected, shuffled, and redealt
-- Each player receives one fewer wire than the previous round
-- Maximum 4 rounds
+| Round | Cards per player |
+|-------|------------------|
+| 1 | 5 |
+| 2 | 4 |
+| 3 | 3 |
+| 4 | 2 |
+
+### Turn Order
+
+- Each round has a **new random turn order**
+- Every player gets exactly **1 turn** per round
+- You **cannot cut your own cards**
+
+---
 
 ## Project Structure
 
 ```
 timebomb-boardgame/
 ├── server/
-│   ├── server.js          # Express server with boardgame.io
-│   ├── game.js            # Re-exports shared game logic
+│   ├── server.js          # Express + Socket.IO server
+│   ├── gameManager.js     # Core game logic and state management
 │   └── package.json
 ├── client/
 │   ├── src/
-│   │   ├── App.jsx        # Main app component
+│   │   ├── App.jsx        # Main app component, socket connection
 │   │   ├── main.jsx       # React entry point
 │   │   ├── components/
-│   │   │   └── GameBoard.jsx  # In-game UI
+│   │   │   ├── Lobby.jsx      # Room/lobby UI
+│   │   │   └── GameBoard.jsx  # In-game UI (setup, playing, game over)
 │   │   └── index.css      # Styles
 │   ├── index.html
 │   ├── vite.config.js
 │   └── package.json
 ├── shared/
-│   └── game.js            # Game logic (used by both client and server)
-├── package.json           # Root package.json
+│   └── game.js            # Shared constants and types
+├── package.json           # Root scripts (dev, build, deploy)
 └── README.md
 ```
 
-## Deployment
+---
 
-### Environment Variables
+## Environment Variables
 
-- `PORT`: Server port (default: 8000)
-- `NODE_ENV`: Set to `production` for production builds
+| Variable | Description | Default |
+|----------|-------------|---------|
+| `PORT` | Server port | `8000` |
+| `NODE_ENV` | Set to `production` for production builds | `development` |
+| `VITE_SERVER_URL` | (Optional) Override server URL in client | Auto-detected |
 
-### Deployment Options
-
-1. **Heroku**: Deploy the server, build the client, and serve static files
-2. **Vercel/Netlify**: Deploy frontend, point to backend server
-3. **Docker**: Containerize the application
-4. **VPS**: Run both server and serve built client files
-
-## Technical Details
-
-### Game State Management
-
-The game uses boardgame.io's state management system:
-- All game logic is server-side
-- Client receives filtered game state (hidden information removed)
-- Moves are validated server-side before applying
-
-### Hidden Information
-
-- **Roles**: Only visible to the player themselves
-- **Wires**: Players only see their own wire cards, others see face-down cards
-- **Revealed wires**: Visible to all players
-
-### Server Validation
-
-All moves are validated:
-- Players cannot cut their own wires
-- Only the active player can make moves
-- Turn order is enforced
-- Win conditions are checked after each move
+---
 
 ## Troubleshooting
 
 ### Connection Issues
-
-- Ensure the server is running on port 8000
-- Check that WebSocket connections are allowed
-- Verify CORS settings if accessing from different domains
+- Ensure the server is running (`npm run dev` or `npm run start`)
+- Check that WebSocket connections are not blocked by firewall/proxy
+- In production, verify `NODE_ENV=production` is set
 
 ### Game Not Starting
+- Need at least **4 players** to start
+- All players must click **"Ready"**
+- Only the **host** can start the game
 
-- Ensure at least 4 players have joined
-- All players must click "READY"
-- Only the host (first player) can start the game
+### Render Deployment Issues
+- Check the **Logs** tab in Render dashboard for errors
+- Ensure `Build Command` is `npm run render-build`
+- Ensure `Start Command` is `npm run start`
+- Verify `NODE_ENV=production` environment variable is set
 
-### Version Issues
-
-If you encounter issues with boardgame.io:
-- This project uses version 0.50.2
-- If installation fails, try clearing node_modules and package-lock.json
-- Ensure Node.js version is 16 or higher
+---
 
 ## License
 
