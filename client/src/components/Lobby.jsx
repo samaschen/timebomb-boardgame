@@ -40,7 +40,7 @@ function Lobby({
   // Show create/join form if not in a room
   if (!gameState || players.length === 0) {
     return (
-      <div className="card" style={{ transform: 'scale(0.75)', transformOrigin: 'top center', marginBottom: '-25%' }}>
+      <div className="card">
         <h1>Time Bomb Game</h1>
         {!connected && (
           <p style={{ color: '#ff9800', marginBottom: '16px' }}>
@@ -120,7 +120,7 @@ function Lobby({
 
   // Show waiting room
   return (
-    <div className="card" style={{ transform: 'scale(0.75)', transformOrigin: 'top center', marginBottom: '-25%' }}>
+    <div className="card">
       <h1>Waiting Room</h1>
       <div className="game-info">
         <p><strong>Room Code:</strong> {gameState?.matchID || roomCode}</p>

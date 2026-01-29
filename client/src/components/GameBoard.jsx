@@ -1,5 +1,12 @@
 import React, { useState, useEffect, useRef } from 'react';
 
+// Clear session storage when starting a new game
+const clearGameSession = () => {
+  sessionStorage.removeItem('timebomb_roomCode');
+  sessionStorage.removeItem('timebomb_playerName');
+  sessionStorage.removeItem('timebomb_playerID');
+};
+
 function GameBoard({ socket, gameState, players, playerID, playerName, onReturnToLobby }) {
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedWireIndex, setSelectedWireIndex] = useState(null);
@@ -458,6 +465,8 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 className="start-game"
                 onClick={() => {
                   setShowGameOverModal(false);
+                  // Clear session storage since we're starting fresh
+                  clearGameSession();
                   // Reset game for everyone in the room - server will broadcast to all players
                   if (socket) {
                     socket.emit('new-game');

@@ -124,6 +124,112 @@ export class GameManager {
   }
 
   /**
+   * Mark a player as disconnected (but keep their slot during active game)
+   */
+  markPlayerDisconnected(roomCode, socketID) {
+    const room = this.rooms.get(roomCode);
+    if (!room) {
+      return { success: false, error: 'Room not found' };
+    }
+
+    const player = room.players.get(socketID);
+    if (!player) {
+      return { success: false, error: 'Player not found' };
+    }
+
+    // Store disconnected player info for potential reconnection
+    if (!room.disconnectedPlayers) {
+      room.disconnectedPlayers = new Map();
+    }
+    
+    // Save player info with their original playerID
+    room.disconnectedPlayers.set(player.id, {
+      id: player.id,
+      name: player.name,
+      disconnectedAt: Date.now(),
+      oldSocketID: socketID,
+    });
+
+    // Remove from active players map
+    room.players.delete(socketID);
+
+    return { success: true, playerName: player.name };
+  }
+
+  /**
+   * Rejoin a room (reconnection after refresh/disconnect)
+   */
+  rejoinRoom(roomCode, socketID, playerName, requestedPlayerID) {
+    roomCode = roomCode.toUpperCase().replace(/[^A-Z]/g, '');
+    
+    const room = this.rooms.get(roomCode);
+    if (!room) {
+      return { success: false, error: 'Room not found' };
+    }
+
+    // Check if this player was disconnected
+    if (room.disconnectedPlayers && room.disconnectedPlayers.has(requestedPlayerID)) {
+      const disconnectedPlayer = room.disconnectedPlayers.get(requestedPlayerID);
+      
+      // Verify the name matches (case-insensitive)
+      if (disconnectedPlayer.name.toLowerCase() !== playerName.toLowerCase()) {
+        return { success: false, error: 'Player name does not match' };
+      }
+
+      // Restore the player with their original ID
+      room.players.set(socketID, {
+        id: disconnectedPlayer.id,
+        name: disconnectedPlayer.name,
+        ready: true, // Keep them ready since game is in progress
+      });
+
+      // Remove from disconnected list
+      room.disconnectedPlayers.delete(requestedPlayerID);
+
+      return { success: true, playerID: disconnectedPlayer.id };
+    }
+
+    // If game is in lobby, allow normal join
+    if (room.gameState.gamePhase === 'lobby') {
+      // Check for duplicate names
+      const normalizedPlayerName = playerName.trim().toLowerCase();
+      const existingNames = Array.from(room.players.values()).map(p => p.name.trim().toLowerCase());
+      if (existingNames.includes(normalizedPlayerName)) {
+        return { success: false, error: `Name "${playerName}" is already taken. Please choose a different name.` };
+      }
+
+      // Check if room is full
+      if (room.players.size >= 8) {
+        return { success: false, error: 'Room is full (max 8 players)' };
+      }
+
+      // Assign new player ID
+      const playerID = room.players.size.toString();
+      room.players.set(socketID, {
+        id: playerID,
+        name: playerName,
+        ready: false,
+      });
+      room.gameState.playerReady[playerID] = false;
+
+      return { success: true, playerID };
+    }
+
+    // Game is in progress but player wasn't in disconnected list
+    // Check if they're trying to rejoin by name
+    const existingPlayerEntry = Array.from(room.players.entries()).find(
+      ([_, p]) => p.name.toLowerCase() === playerName.toLowerCase()
+    );
+    
+    if (existingPlayerEntry) {
+      // Player with this name exists and is connected
+      return { success: false, error: 'A player with this name is already connected' };
+    }
+
+    return { success: false, error: 'Cannot join a game in progress' };
+  }
+
+  /**
    * Get list of players in a room
    */
   getRoomPlayers(roomCode) {

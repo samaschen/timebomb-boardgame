@@ -421,17 +421,82 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Handle rejoin (reconnection after refresh/disconnect)
+  socket.on('rejoin-room', ({ roomCode, playerName, playerID }) => {
+    try {
+      console.log(`Player ${playerName} (${socket.id}) attempting to rejoin room ${roomCode} as player ${playerID}`);
+      
+      if (!roomCode || !playerName) {
+        socket.emit('rejoin-failed', { message: 'Room code and player name are required' });
+        return;
+      }
+
+      const result = gameManager.rejoinRoom(roomCode, socket.id, playerName, playerID);
+      
+      if (result.success) {
+        socket.join(roomCode);
+        socket.roomCode = roomCode;
+        socket.playerID = result.playerID;
+        
+        console.log(`Player ${playerName} rejoined room ${roomCode} as player ${result.playerID}`);
+        
+        // Send current game state to the rejoined player
+        const playerView = gameManager.getPlayerView(roomCode, result.playerID);
+        playerView.playerID = result.playerID.toString();
+        const room = gameManager.rooms.get(roomCode);
+        if (room && room.gameState.wireDeck) {
+          playerView.wireDeck = room.gameState.wireDeck;
+        }
+        socket.emit('game-state', playerView);
+        socket.emit('rejoin-success', { playerID: result.playerID });
+        
+        // Notify all players in the room of the reconnection
+        const roomPlayers = gameManager.getRoomPlayers(roomCode);
+        const publicState = gameManager.getPublicState(roomCode);
+        
+        io.to(roomCode).emit('room-updated', {
+          players: roomPlayers,
+          gameState: publicState,
+        });
+      } else {
+        console.log(`Rejoin failed: ${result.error}`);
+        socket.emit('rejoin-failed', { message: result.error });
+      }
+    } catch (error) {
+      console.error('Error rejoining room:', error);
+      socket.emit('rejoin-failed', { message: 'Failed to rejoin room: ' + error.message });
+    }
+  });
+
   // Handle disconnection
   socket.on('disconnect', () => {
     const roomCode = socket.roomCode;
+    const playerID = socket.playerID;
+    
     if (roomCode) {
-      const result = gameManager.leaveRoom(roomCode, socket.id);
-      if (result.success) {
-        socket.leave(roomCode);
-        io.to(roomCode).emit('room-updated', {
-          players: gameManager.getRoomPlayers(roomCode),
-          gameState: gameManager.getPublicState(roomCode),
-        });
+      const room = gameManager.rooms.get(roomCode);
+      
+      // If game is in progress (not lobby), mark player as disconnected but keep them in the game
+      if (room && room.gameState.gamePhase !== 'lobby') {
+        const result = gameManager.markPlayerDisconnected(roomCode, socket.id);
+        if (result.success) {
+          console.log(`Player ${playerID} disconnected from active game in room ${roomCode}, keeping slot reserved`);
+          io.to(roomCode).emit('room-updated', {
+            players: gameManager.getRoomPlayers(roomCode),
+            gameState: gameManager.getPublicState(roomCode),
+          });
+          io.to(roomCode).emit('player-disconnected', { playerID, playerName: result.playerName });
+        }
+      } else {
+        // In lobby, remove player completely
+        const result = gameManager.leaveRoom(roomCode, socket.id);
+        if (result.success) {
+          socket.leave(roomCode);
+          io.to(roomCode).emit('room-updated', {
+            players: gameManager.getRoomPlayers(roomCode),
+            gameState: gameManager.getPublicState(roomCode),
+          });
+        }
       }
     }
     console.log(`Client disconnected: ${socket.id}`);

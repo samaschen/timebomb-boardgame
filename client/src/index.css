@@ -379,3 +379,37 @@ h2 {
   font-size: 14px;
   font-weight: 500;
 }
+
+/* ===========================================
+   RESPONSIVE SCALING
+   Base: the original scale(0.75) = 75% size
+   - Desktop/Laptop (3x larger): 0.75 * 3 = 2.25 scale
+   - Mobile/Phone (1.2x larger): 0.75 * 1.2 = 0.9 scale
+   =========================================== */
+
+/* Mobile/Phone - screens narrower than 768px (default, mobile-first) */
+.app-container {
+  transform: scale(0.9);
+  transform-origin: top center;
+}
+
+/* Desktop/Laptop - screens 768px and wider */
+@media (min-width: 768px) {
+  .app-container {
+    transform: scale(2.25);
+    transform-origin: center center;
+  }
+  
+  #root {
+    overflow: visible;
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  
+  body {
+    min-height: 100vh;
+    overflow: auto;
+  }
+}

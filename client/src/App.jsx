@@ -7,6 +7,34 @@ import GameBoard from './components/GameBoard';
 // In development, use localhost:8000
 const SERVER_URL = import.meta.env.VITE_SERVER_URL || (import.meta.env.PROD ? '' : 'http://localhost:8000');
 
+// Session storage keys
+const SESSION_KEYS = {
+  ROOM_CODE: 'timebomb_roomCode',
+  PLAYER_NAME: 'timebomb_playerName',
+  PLAYER_ID: 'timebomb_playerID',
+};
+
+// Helper functions for session storage
+const saveSession = (roomCode, playerName, playerID) => {
+  sessionStorage.setItem(SESSION_KEYS.ROOM_CODE, roomCode);
+  sessionStorage.setItem(SESSION_KEYS.PLAYER_NAME, playerName);
+  sessionStorage.setItem(SESSION_KEYS.PLAYER_ID, playerID);
+};
+
+const getSession = () => {
+  return {
+    roomCode: sessionStorage.getItem(SESSION_KEYS.ROOM_CODE),
+    playerName: sessionStorage.getItem(SESSION_KEYS.PLAYER_NAME),
+    playerID: sessionStorage.getItem(SESSION_KEYS.PLAYER_ID),
+  };
+};
+
+const clearSession = () => {
+  sessionStorage.removeItem(SESSION_KEYS.ROOM_CODE);
+  sessionStorage.removeItem(SESSION_KEYS.PLAYER_NAME);
+  sessionStorage.removeItem(SESSION_KEYS.PLAYER_ID);
+};
+
 function App() {
   const [socket, setSocket] = useState(null);
   const [playerName, setPlayerName] = useState('');
@@ -16,13 +44,23 @@ function App() {
   const [playerID, setPlayerID] = useState(null);
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
+  const [attemptingRejoin, setAttemptingRejoin] = useState(false);
 
-  // Check for room code in URL
+  // Check for room code in URL or saved session
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const room = params.get('room');
     if (room) {
       setRoomCode(room.toUpperCase());
+    }
+    
+    // Load saved session data
+    const session = getSession();
+    if (session.playerName) {
+      setPlayerName(session.playerName);
+    }
+    if (session.roomCode && !room) {
+      setRoomCode(session.roomCode);
     }
   }, []);
 
@@ -49,6 +87,18 @@ function App() {
       if (connectionTimeout) clearTimeout(connectionTimeout);
       setConnected(true);
       setError(null);
+      
+      // Try to rejoin if we have a saved session
+      const session = getSession();
+      if (session.roomCode && session.playerName && session.playerID) {
+        console.log('Attempting to rejoin room:', session.roomCode);
+        setAttemptingRejoin(true);
+        newSocket.emit('rejoin-room', {
+          roomCode: session.roomCode,
+          playerName: session.playerName,
+          playerID: session.playerID,
+        });
+      }
     };
 
     const handleConnectError = (error) => {
@@ -91,9 +141,17 @@ function App() {
       console.log('Received game state:', state);
       console.log('Game phase:', state?.gamePhase, 'Round:', state?.currentRound);
       setGameState(state);
+      setAttemptingRejoin(false);
       // Update playerID from game state if available
       if (state && state.playerID !== undefined) {
         setPlayerID(state.playerID.toString());
+        // Save session when we have valid game state with playerID
+        if (state.matchID) {
+          const currentName = sessionStorage.getItem(SESSION_KEYS.PLAYER_NAME) || '';
+          if (currentName) {
+            saveSession(state.matchID, currentName, state.playerID.toString());
+          }
+        }
       }
     };
 
@@ -119,6 +177,25 @@ function App() {
       }));
     };
 
+    const handleRejoinSuccess = (data) => {
+      console.log('Rejoin successful:', data);
+      setAttemptingRejoin(false);
+      setPlayerID(data.playerID.toString());
+    };
+
+    const handleRejoinFailed = (data) => {
+      console.log('Rejoin failed:', data.message);
+      setAttemptingRejoin(false);
+      // Clear the invalid session
+      clearSession();
+      // Don't show error - just let user join normally
+    };
+
+    const handlePlayerDisconnected = (data) => {
+      console.log('Player disconnected:', data);
+      // Could show a notification here if desired
+    };
+
     // Set up event listeners
     newSocket.on('connect', handleConnect);
     newSocket.on('connect_error', handleConnectError);
@@ -127,6 +204,9 @@ function App() {
     newSocket.on('game-state', handleGameState);
     newSocket.on('room-updated', handleRoomUpdated);
     newSocket.on('game-finished', handleGameFinished);
+    newSocket.on('rejoin-success', handleRejoinSuccess);
+    newSocket.on('rejoin-failed', handleRejoinFailed);
+    newSocket.on('player-disconnected', handlePlayerDisconnected);
 
     // Connection timeout
     connectionTimeout = setTimeout(() => {
@@ -208,6 +288,8 @@ function App() {
     }
 
     console.log('Joining room:', code, 'as', name);
+    // Save player name to session immediately (roomCode and playerID will be saved when we get game-state)
+    sessionStorage.setItem(SESSION_KEYS.PLAYER_NAME, name);
     socket.emit('join-room', { roomCode: code, playerName: name });
   };
 
@@ -228,41 +310,70 @@ function App() {
   // Show connection error only if it's a critical error (not just "connecting")
   // Allow user to still interact with the form
 
-  // Show lobby if not in a game
-  if (!gameState || gameState.gamePhase === 'lobby') {
-    return (
-      <Lobby
-        socket={socket}
-        connected={connected}
-        playerName={playerName}
-        setPlayerName={setPlayerName}
-        roomCode={roomCode}
-        setRoomCode={setRoomCode}
-        players={players}
-        playerID={playerID}
-        gameState={gameState}
-        onCreateRoom={handleCreateRoom}
-        onJoinRoom={handleJoinRoom}
-      />
-    );
-  }
-
   // Handle return to lobby (not used anymore - server handles reset via 'new-game')
   const handleReturnToLobby = () => {
     // This is kept for compatibility but shouldn't be called anymore
     // Server's 'new-game' handler now resets everyone
   };
 
+  // Show reconnecting indicator if attempting to rejoin
+  if (attemptingRejoin) {
+    return (
+      <div className="app-container">
+        <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
+          <h2>Reconnecting...</h2>
+          <p style={{ marginTop: '16px', color: '#666' }}>
+            Attempting to rejoin your game session
+          </p>
+          <div style={{ marginTop: '24px' }}>
+            <div style={{
+              width: '40px',
+              height: '40px',
+              border: '4px solid #f3f3f3',
+              borderTop: '4px solid #667eea',
+              borderRadius: '50%',
+              animation: 'spin 1s linear infinite',
+              margin: '0 auto'
+            }} />
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  // Show lobby if not in a game
+  if (!gameState || gameState.gamePhase === 'lobby') {
+    return (
+      <div className="app-container">
+        <Lobby
+          socket={socket}
+          connected={connected}
+          playerName={playerName}
+          setPlayerName={setPlayerName}
+          roomCode={roomCode}
+          setRoomCode={setRoomCode}
+          players={players}
+          playerID={playerID}
+          gameState={gameState}
+          onCreateRoom={handleCreateRoom}
+          onJoinRoom={handleJoinRoom}
+        />
+      </div>
+    );
+  }
+
   // Show game board
   return (
-    <GameBoard
-      socket={socket}
-      gameState={gameState}
-      players={players}
-      playerID={playerID}
-      playerName={playerName}
-      onReturnToLobby={handleReturnToLobby}
-    />
+    <div className="app-container">
+      <GameBoard
+        socket={socket}
+        gameState={gameState}
+        players={players}
+        playerID={playerID}
+        playerName={playerName}
+        onReturnToLobby={handleReturnToLobby}
+      />
+    </div>
   );
 }
 
