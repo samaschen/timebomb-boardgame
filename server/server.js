@@ -460,6 +460,62 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Exit to lobby (mid-game exit that returns everyone to lobby)
+  socket.on('exit-to-lobby', () => {
+    const roomCode = socket.roomCode;
+    
+    if (!roomCode) {
+      socket.emit('error', { message: 'Not in a room' });
+      return;
+    }
+
+    const room = gameManager.rooms.get(roomCode);
+    if (!room) {
+      socket.emit('error', { message: 'Room not found' });
+      return;
+    }
+
+    // Get the player who initiated the exit
+    const initiatingPlayer = room.players.get(socket.id);
+    const playerName = initiatingPlayer ? initiatingPlayer.name : 'A player';
+
+    // Reset game to lobby
+    const result = gameManager.resetRoomToLobby(roomCode);
+    if (result.success) {
+      console.log(`${playerName} exited to lobby - room ${roomCode} reset`);
+      
+      // Notify all players
+      io.to(roomCode).emit('game-exited-to-lobby', {
+        initiatedBy: playerName,
+        message: `${playerName} has ended the game. Returning to lobby.`
+      });
+      
+      // Send updated game state to all players
+      room.players.forEach((player, socketId) => {
+        const playerView = gameManager.getPlayerView(roomCode, player.id);
+        playerView.playerID = player.id.toString();
+        playerView.gamePhase = 'lobby';
+        playerView.playerReady = {};
+        playerView.setupReady = {};
+        playerView.playerClaims = {};
+        playerView.currentRound = 0;
+        playerView.wireDeck = [];
+        playerView.playerWires = {};
+        playerView.playerRoles = {};
+        playerView.revealedWires = [];
+        playerView.defusingWires = [];
+        io.to(socketId).emit('game-state', playerView);
+      });
+      
+      io.to(roomCode).emit('room-updated', {
+        players: gameManager.getRoomPlayers(roomCode),
+        gameState: gameManager.getPublicState(roomCode),
+      });
+    } else {
+      socket.emit('error', { message: result.error });
+    }
+  });
+
   // Handle rejoin (reconnection after refresh/disconnect)
   socket.on('rejoin-room', ({ roomCode, playerName, playerID }) => {
     try {
@@ -489,13 +545,15 @@ io.on('connection', (socket) => {
         socket.emit('game-state', playerView);
         socket.emit('rejoin-success', { playerID: result.playerID });
         
-        // Notify all players in the room of the reconnection
+        // Notify all players that this player has reconnected
+        // Only send player list update, not game state (to preserve other players' views)
         const roomPlayers = gameManager.getRoomPlayers(roomCode);
-        const publicState = gameManager.getPublicState(roomCode);
-        
-        io.to(roomCode).emit('room-updated', {
+        io.to(roomCode).emit('player-reconnected', {
+          playerID: result.playerID,
+          playerName: playerName,
+        });
+        io.to(roomCode).emit('players-updated', {
           players: roomPlayers,
-          gameState: publicState,
         });
       } else {
         console.log(`Rejoin failed: ${result.error}`);
@@ -520,11 +578,50 @@ io.on('connection', (socket) => {
         const result = gameManager.markPlayerDisconnected(roomCode, socket.id);
         if (result.success) {
           console.log(`Player ${playerID} disconnected from active game in room ${roomCode}, keeping slot reserved`);
-          io.to(roomCode).emit('room-updated', {
-            players: gameManager.getRoomPlayers(roomCode),
-            gameState: gameManager.getPublicState(roomCode),
+          
+          // Only notify other players that this player is reconnecting
+          // DO NOT send room-updated or game-state - other players should continue playing unaffected
+          io.to(roomCode).emit('player-reconnecting', { 
+            playerID, 
+            playerName: result.playerName,
+            message: `${result.playerName} is reconnecting...`
           });
-          io.to(roomCode).emit('player-disconnected', { playerID, playerName: result.playerName });
+          
+          // Set a timeout - if player doesn't rejoin within 30 seconds, drop them
+          const RECONNECT_TIMEOUT = 30000; // 30 seconds
+          
+          setTimeout(() => {
+            const currentRoom = gameManager.rooms.get(roomCode);
+            if (currentRoom && currentRoom.disconnectedPlayers && currentRoom.disconnectedPlayers.has(playerID)) {
+              // Player didn't rejoin in time - remove them and return everyone to lobby
+              const droppedPlayer = currentRoom.disconnectedPlayers.get(playerID);
+              currentRoom.disconnectedPlayers.delete(playerID);
+              
+              console.log(`Player ${droppedPlayer.name} (${playerID}) timed out - returning room ${roomCode} to lobby`);
+              
+              // Reset game to lobby state
+              gameManager.resetRoomToLobby(roomCode);
+              
+              // Notify all remaining players
+              io.to(roomCode).emit('player-dropped', {
+                playerName: droppedPlayer.name,
+                message: `Oops.. ${droppedPlayer.name} left the room`
+              });
+              
+              // Send updated room state
+              io.to(roomCode).emit('room-updated', {
+                players: gameManager.getRoomPlayers(roomCode),
+                gameState: gameManager.getPublicState(roomCode),
+              });
+              
+              // Send individual game states to each player
+              currentRoom.players.forEach((player, socketId) => {
+                const playerView = gameManager.getPlayerView(roomCode, player.id);
+                playerView.playerID = player.id.toString();
+                io.to(socketId).emit('game-state', playerView);
+              });
+            }
+          }, RECONNECT_TIMEOUT);
         }
       } else {
         // In lobby, remove player completely

@@ -17,6 +17,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
   const [showGameOverModal, setShowGameOverModal] = useState(false);
   const [showConfirmCut, setShowConfirmCut] = useState(false);
   const [pendingCut, setPendingCut] = useState(null); // { targetPlayerId, wireIndex }
+  const [showExitConfirm, setShowExitConfirm] = useState(false);
   
   // Auto-show cards when entering setup phase - preserve state when switching browsers
   useEffect(() => {
@@ -97,6 +98,101 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
     }
   }, [gameState?.gamePhase, showGameOverModal]);
 
+  // Handle exit to lobby
+  const handleExitToLobby = () => {
+    if (socket) {
+      socket.emit('exit-to-lobby');
+    }
+    setShowExitConfirm(false);
+  };
+
+  // Exit Confirmation Popup Component
+  const ExitConfirmPopup = () => (
+    showExitConfirm && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}>
+        <div style={{
+          background: 'white',
+          padding: 'clamp(20px, 4vw, 32px)',
+          borderRadius: '12px',
+          maxWidth: 'min(90vw, 400px)',
+          textAlign: 'center',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        }}>
+          <div style={{ fontSize: 'clamp(32px, 6vw, 48px)', marginBottom: '16px' }}>⚠️</div>
+          <h2 style={{ color: '#333', marginBottom: '16px', fontSize: 'clamp(16px, 3vw, 20px)' }}>
+            Exit to Lobby?
+          </h2>
+          <p style={{ color: '#666', fontSize: 'clamp(12px, 2vw, 14px)', marginBottom: '24px' }}>
+            Are you sure you want to return to the Lobby? This will end the game for everyone.
+          </p>
+          <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
+            <button
+              onClick={() => setShowExitConfirm(false)}
+              style={{
+                padding: '10px 24px',
+                background: 'white',
+                color: '#333',
+                border: '2px solid #e0e0e0',
+                borderRadius: '6px',
+                fontSize: 'clamp(12px, 2vw, 14px)',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              No
+            </button>
+            <button
+              onClick={handleExitToLobby}
+              style={{
+                padding: '10px 24px',
+                background: '#f44336',
+                color: 'white',
+                border: 'none',
+                borderRadius: '6px',
+                fontSize: 'clamp(12px, 2vw, 14px)',
+                cursor: 'pointer',
+                fontWeight: 'bold',
+              }}
+            >
+              Yes
+            </button>
+          </div>
+        </div>
+      </div>
+    )
+  );
+
+  // Exit to Lobby Button Component
+  const ExitToLobbyButton = () => (
+    <div style={{ marginTop: 'clamp(16px, 3vw, 24px)', textAlign: 'center' }}>
+      <button
+        onClick={() => setShowExitConfirm(true)}
+        style={{
+          padding: 'clamp(8px, 1.5vw, 12px) clamp(16px, 3vw, 24px)',
+          background: '#9e9e9e',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          fontSize: 'clamp(11px, 1.8vw, 14px)',
+          cursor: 'pointer',
+        }}
+      >
+        🚪 Exit to Lobby
+      </button>
+    </div>
+  );
+
   // NOW we can do early returns - all hooks are above this point
   if (!gameState) {
     console.log('GameBoard - No gameState, showing loading');
@@ -131,13 +227,12 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
     const allPlayersReady = players.length > 0 && players.every((p) => G.setupReady?.[p.id] === true);
 
     return (
-      <div className="card">
+      <div className="card game-board-card">
         <h1>Game Setup</h1>
         <div className="game-info">
           <p>
             Your role: <strong style={{ 
               color: G.playerRoles?.[playerID?.toString()] === 'good' ? '#4CAF50' : '#f44336',
-              fontSize: '18px'
             }}>
               {(() => {
                 const role = G.playerRoles?.[playerID?.toString()];
@@ -148,7 +243,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
             </strong>
           </p>
           {!G.playerRoles?.[playerID?.toString()] && (
-            <p style={{ fontSize: '12px', color: '#999', marginTop: '4px' }}>
+            <p style={{ fontSize: 'clamp(10px, 1.5vw, 12px)', color: '#999', marginTop: '4px' }}>
               Waiting for role assignment...
             </p>
           )}
@@ -184,20 +279,20 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   >
                     {wire.type === 'defusing' && (
                       <>
-                        <div style={{ fontSize: '24px', marginBottom: '4px' }}>✓</div>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold' }}>DEFUSING</div>
+                        <div style={{ fontSize: 'clamp(16px, 4vw, 24px)', marginBottom: '4px' }}>✓</div>
+                        <div style={{ fontWeight: 'bold' }}>DEFUSING</div>
                       </>
                     )}
                     {wire.type === 'safe' && (
                       <>
-                        <div style={{ fontSize: '24px', marginBottom: '4px' }}>○</div>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold' }}>SAFE</div>
+                        <div style={{ fontSize: 'clamp(16px, 4vw, 24px)', marginBottom: '4px' }}>○</div>
+                        <div style={{ fontWeight: 'bold' }}>SAFE</div>
                       </>
                     )}
                     {wire.type === 'bomb' && (
                       <>
-                        <div style={{ fontSize: '32px', marginBottom: '4px' }}>💣</div>
-                        <div style={{ fontSize: '12px', fontWeight: 'bold' }}>BOMB!</div>
+                        <div style={{ fontSize: 'clamp(20px, 5vw, 32px)', marginBottom: '4px' }}>💣</div>
+                        <div style={{ fontWeight: 'bold' }}>BOMB!</div>
                       </>
                     )}
                   </div>
@@ -266,14 +361,14 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
           </>
         ) : (
           <>
-            <p style={{ marginBottom: '16px' }}>Your claim has been submitted. Waiting for other players...</p>
+            <p style={{ marginBottom: 'clamp(8px, 2vw, 16px)' }}>Your claim has been submitted. Waiting for other players...</p>
             <div className="game-info">
-              <h3 style={{ marginBottom: '12px' }}>Players Ready to Start:</h3>
+              <h3 style={{ marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>Players Ready to Start:</h3>
               <div style={{ 
                 display: 'grid', 
-                gridTemplateColumns: 'repeat(4, 1fr)', 
-                gap: '12px',
-                maxWidth: '600px',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(70px, 15vw, 100px), 1fr))', 
+                gap: 'clamp(6px, 1.5vw, 12px)',
+                maxWidth: '100%',
                 margin: '0 auto'
               }}>
                 {players.map((player) => {
@@ -282,13 +377,10 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   const isCurrentPlayer = player.id === playerID;
                   return (
                     <div 
-                      key={player.id} 
+                      key={player.id}
+                      className="player-status-card"
                       style={{
-                        width: '120px',
-                        height: '160px',
-                        border: `3px solid ${isReady ? '#4CAF50' : hasClaimed ? '#FF9800' : '#e0e0e0'}`,
-                        borderRadius: '8px',
-                        padding: '12px',
+                        border: `2px solid ${isReady ? '#4CAF50' : hasClaimed ? '#FF9800' : '#e0e0e0'}`,
                         display: 'flex',
                         flexDirection: 'column',
                         alignItems: 'center',
@@ -298,30 +390,25 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                         boxShadow: isCurrentPlayer ? '0 0 8px rgba(33, 150, 243, 0.5)' : 'none',
                       }}
                     >
-                      <div style={{ 
-                        fontSize: '32px', 
-                        marginBottom: '8px',
+                      <div className="icon" style={{ 
                         color: isReady ? '#4CAF50' : hasClaimed ? '#FF9800' : '#999'
                       }}>
                         {isReady ? '✓' : hasClaimed ? '⏳' : '○'}
                       </div>
-                      <div style={{ 
-                        fontSize: '14px', 
+                      <div className="name" style={{ 
                         fontWeight: 'bold',
                         textAlign: 'center',
-                        marginBottom: '4px',
                         color: '#333'
                       }}>
                         {player.name}
                       </div>
                       {isCurrentPlayer && (
-                        <div style={{ fontSize: '10px', color: '#666', marginTop: '4px' }}>(You)</div>
+                        <div style={{ fontSize: 'clamp(8px, 1.3vw, 10px)', color: '#666', marginTop: '4px' }}>(You)</div>
                       )}
-                      <div style={{ 
-                        fontSize: '11px', 
+                      <div className="status" style={{ 
                         color: isReady ? '#4CAF50' : hasClaimed ? '#FF9800' : '#999',
                         fontWeight: isReady ? 'bold' : 'normal',
-                        marginTop: '8px'
+                        marginTop: 'clamp(4px, 1vw, 8px)'
                       }}>
                         {isReady ? 'Ready' : hasClaimed ? 'Claimed' : 'Waiting'}
                       </div>
@@ -387,6 +474,12 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
             )}
           </>
         )}
+        
+        {/* Exit to Lobby Button */}
+        <ExitToLobbyButton />
+        
+        {/* Exit Confirmation Popup */}
+        <ExitConfirmPopup />
       </div>
     );
   }
@@ -496,18 +589,18 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
         </div>
       )}
 
-      <div className="card" style={{ padding: '12px', fontSize: '14px' }}>
+      <div className="card game-board-card">
         {/* Compact header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '12px' }}>
-          <h1 style={{ margin: 0, fontSize: '20px' }}>Round {G.currentRound || 1}</h1>
-          <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>
+          <h1 style={{ margin: 0 }}>Round {G.currentRound || 1}</h1>
+          <div style={{ display: 'flex', gap: 'clamp(6px, 1.5vw, 12px)', alignItems: 'center' }}>
             {isMyTurn && G.allClaimsReady && (
               <div style={{ 
-                fontSize: '14px', 
+                fontSize: 'clamp(10px, 1.8vw, 14px)', 
                 fontWeight: 'bold', 
                 color: '#f44336',
                 background: '#ffebee',
-                padding: '4px 8px',
+                padding: 'clamp(2px, 0.5vw, 4px) clamp(4px, 1vw, 8px)',
                 borderRadius: '4px'
               }}>
                 YOUR TURN
@@ -518,9 +611,9 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
 
         {/* Turn order - compact */}
         {G.turnOrder && G.turnOrder.length > 0 && (
-          <div style={{ marginBottom: '12px', fontSize: '12px' }}>
+          <div className="turn-order-container" style={{ marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>
             <strong>Turn:</strong>{' '}
-            <span style={{ display: 'flex', alignItems: 'center', gap: '4px', flexWrap: 'wrap', marginTop: '4px' }}>
+            <span style={{ display: 'flex', alignItems: 'center', gap: 'clamp(2px, 0.5vw, 4px)', flexWrap: 'wrap', marginTop: '4px' }}>
             {G.turnOrder.map((pid, idx) => {
               const player = players.find((p) => p.id === pid);
               const isCurrent = idx === (G.turnIndex || 0);
@@ -529,19 +622,18 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
               return (
                 <React.Fragment key={pid}>
                   <span
+                    className="turn-player-name"
                     style={{
-                      padding: '4px 8px',
                       background: isCurrent ? '#4CAF50' : 'transparent',
                       color: isCurrent ? 'white' : '#333',
                       borderRadius: '3px',
                       fontWeight: isCurrent ? 'bold' : 'normal',
                       border: isCurrent ? '2px solid #4CAF50' : '1px solid #e0e0e0',
-                      fontSize: '11px',
                     }}
                   >
                     {player?.name || `P${pid}`}
                   </span>
-                  {!isLast && <span style={{ color: '#666', fontSize: '10px' }}>→</span>}
+                  {!isLast && <span style={{ color: '#666', fontSize: 'clamp(8px, 1.3vw, 10px)' }}>→</span>}
                 </React.Fragment>
               );
             })}
@@ -570,7 +662,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                       background: '#e8f5e9',
                       border: '1px solid #4caf50',
                       borderRadius: '4px',
-                      fontSize: '11px',
+                      fontSize: 'clamp(9px, 1.5vw, 11px)',
                       fontWeight: '500',
                       color: '#2e7d32'
                     }}
@@ -586,9 +678,9 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
         {/* 2-column grid of player containers */}
         <div style={{ 
           display: 'grid', 
-          gridTemplateColumns: 'repeat(2, 1fr)', 
-          gap: '12px',
-          marginTop: '12px'
+          gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(140px, 40vw, 250px), 1fr))', 
+          gap: 'clamp(6px, 1.5vw, 12px)',
+          marginTop: 'clamp(6px, 1.5vw, 12px)'
         }}>
           {players.map((player) => {
             const playerWires = G.playerWires?.[player.id] || [];
@@ -601,26 +693,25 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
             return (
               <div
                 key={player.id}
+                className="player-game-container"
                 style={{
                   background: containerColor.bg,
                   border: `2px solid ${containerColor.border}`,
-                  borderRadius: '8px',
-                  padding: '12px',
-                  minHeight: '150px',
+                  minHeight: 'clamp(100px, 20vw, 150px)',
                 }}
               >
                 {/* Player name and claim */}
-                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-                  <div style={{ fontWeight: 'bold', fontSize: '14px', color: '#333' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
+                  <div className="player-name" style={{ fontWeight: 'bold', color: '#333' }}>
                     {player.name} {player.id === playerID && '(You)'}
                   </div>
-                  <div style={{ fontSize: '12px', color: '#666', fontWeight: 'bold' }}>
+                  <div className="claim-badge" style={{ color: '#666', fontWeight: 'bold', background: 'rgba(255,255,255,0.5)', borderRadius: '4px' }}>
                     Claim: {playerClaim}
                   </div>
                 </div>
 
                 {/* Player's cards */}
-                <div style={{ display: 'flex', gap: '4px', flexWrap: 'wrap' }}>
+                <div style={{ display: 'flex', gap: 'clamp(2px, 0.5vw, 4px)', flexWrap: 'wrap' }}>
                   {playerWires.map((wireValue, idx) => {
                     // For other players: wireValue is a display position index (0, 1, 2, ...) that maps to actual position
                     // For own cards: wireValue is the actual wire deck index
@@ -659,9 +750,9 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                           }
                         }}
                         style={{
-                          width: '46px',
-                          height: '58px',
-                          fontSize: '10px',
+                          width: 'clamp(32px, 8vw, 46px)',
+                          height: 'clamp(40px, 10vw, 58px)',
+                          fontSize: 'clamp(8px, 1.5vw, 10px)',
                           cursor: canCut && !isRevealed ? 'pointer' : 'default',
                           opacity: canCut && !isRevealed ? 1 : (isRevealed ? 1 : 0.7),
                           transform: canCut && !isRevealed ? 'scale(1)' : 'scale(0.9)',
@@ -672,25 +763,25 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                           <>
                             {revealedWire.wireType === 'defusing' && (
                               <>
-                                <div style={{ fontSize: '16px', marginBottom: '2px' }}>✓</div>
-                                <div style={{ fontSize: '8px', fontWeight: 'bold' }}>DEF</div>
+                                <div style={{ fontSize: 'clamp(12px, 2.5vw, 16px)', marginBottom: '2px' }}>✓</div>
+                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>DEF</div>
                               </>
                             )}
                             {revealedWire.wireType === 'safe' && (
                               <>
-                                <div style={{ fontSize: '16px', marginBottom: '2px' }}>○</div>
-                                <div style={{ fontSize: '8px', fontWeight: 'bold' }}>SAFE</div>
+                                <div style={{ fontSize: 'clamp(12px, 2.5vw, 16px)', marginBottom: '2px' }}>○</div>
+                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>SAFE</div>
                               </>
                             )}
                             {revealedWire.wireType === 'bomb' && (
                               <>
-                                <div style={{ fontSize: '20px', marginBottom: '2px' }}>💣</div>
-                                <div style={{ fontSize: '8px', fontWeight: 'bold' }}>BOMB</div>
+                                <div style={{ fontSize: 'clamp(14px, 3vw, 20px)', marginBottom: '2px' }}>💣</div>
+                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>BOMB</div>
                               </>
                             )}
                           </>
                         ) : (
-                          <div style={{ fontSize: '14px' }}>?</div>
+                          <div style={{ fontSize: 'clamp(10px, 2vw, 14px)' }}>?</div>
                         )}
                       </div>
                     );
@@ -807,7 +898,13 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
             )}
           </div>
         )}
+        
+        {/* Exit to Lobby Button - only show if game is not finished */}
+        {G.gamePhase !== 'finished' && <ExitToLobbyButton />}
       </div>
+      
+      {/* Exit Confirmation Popup */}
+      <ExitConfirmPopup />
     </>
     );
   }

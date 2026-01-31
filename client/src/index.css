@@ -122,10 +122,10 @@ h2 {
 }
 
 .wire-card {
-  width: 80px;
-  height: 100px;
+  width: clamp(50px, 12vw, 80px);
+  height: clamp(65px, 15vw, 100px);
   border: 2px solid #333;
-  border-radius: 8px;
+  border-radius: clamp(4px, 1vw, 8px);
   display: flex;
   flex-direction: column;
   align-items: center;
@@ -134,6 +134,7 @@ h2 {
   cursor: pointer;
   transition: all 0.2s;
   font-weight: bold;
+  font-size: clamp(8px, 1.5vw, 12px);
 }
 
 .wire-card:hover:not(.revealed):not(.disabled) {
@@ -440,11 +441,10 @@ h2 {
   font-size: clamp(12px, 1.6vw, 16px);
 }
 
-/* Wire cards responsive */
-.wire-card {
-  width: clamp(50px, 10vw, 80px);
-  height: clamp(65px, 12vw, 100px);
-  font-size: clamp(10px, 1.5vw, 14px);
+/* Wire row responsive */
+.wire-row {
+  gap: clamp(4px, 1vw, 8px);
+  margin: clamp(8px, 2vw, 16px) 0;
 }
 
 /* Game info sections */
@@ -494,6 +494,87 @@ h2 {
 
 .player-status-text {
   font-size: clamp(10px, 1.4vw, 14px);
+}
+
+/* ===========================================
+   GAMEBOARD RESPONSIVE COMPONENTS
+   =========================================== */
+
+/* Player status cards in setup phase */
+.player-status-card {
+  width: clamp(80px, 18vw, 120px);
+  height: clamp(100px, 22vw, 160px);
+  border-radius: clamp(4px, 1vw, 8px);
+  padding: clamp(6px, 1.5vw, 12px);
+}
+
+.player-status-card .icon {
+  font-size: clamp(20px, 5vw, 32px);
+  margin-bottom: clamp(4px, 1vw, 8px);
+}
+
+.player-status-card .name {
+  font-size: clamp(10px, 2vw, 14px);
+}
+
+.player-status-card .status {
+  font-size: clamp(8px, 1.5vw, 11px);
+}
+
+/* Game board container */
+.game-board-card {
+  padding: clamp(8px, 2vw, 12px);
+  font-size: clamp(11px, 1.8vw, 14px);
+  max-width: min(98vw, 800px);
+  overflow-x: auto;
+}
+
+.game-board-card h1 {
+  font-size: clamp(16px, 3vw, 20px);
+}
+
+.game-board-card h2 {
+  font-size: clamp(12px, 2.5vw, 16px);
+}
+
+/* Player container in playing phase */
+.player-game-container {
+  padding: clamp(6px, 1.5vw, 10px);
+  border-radius: clamp(4px, 1vw, 8px);
+  margin-bottom: clamp(6px, 1.5vw, 10px);
+}
+
+.player-game-container .player-name {
+  font-size: clamp(11px, 2vw, 14px);
+}
+
+.player-game-container .claim-badge {
+  font-size: clamp(10px, 1.8vw, 12px);
+  padding: clamp(2px, 0.5vw, 4px) clamp(4px, 1vw, 8px);
+}
+
+/* Small wire cards for playing phase */
+.wire-card-small {
+  width: clamp(32px, 8vw, 46px);
+  height: clamp(40px, 10vw, 58px);
+  font-size: clamp(6px, 1.2vw, 10px);
+  border-radius: clamp(3px, 0.8vw, 6px);
+}
+
+/* Turn order display */
+.turn-order-container {
+  font-size: clamp(10px, 1.6vw, 12px);
+  gap: clamp(2px, 0.5vw, 4px);
+}
+
+.turn-player-name {
+  padding: clamp(2px, 0.5vw, 4px) clamp(4px, 1vw, 8px);
+  font-size: clamp(9px, 1.4vw, 11px);
+}
+
+/* Defusing wire tags */
+.defusing-container {
+  margin-bottom: clamp(6px, 1.5vw, 12px);
 }
 
 /* ===========================================

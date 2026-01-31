@@ -128,11 +128,34 @@ export class GameManager {
       return { success: false, error: 'Room not found' };
     }
 
+    // Check if the leaving player is the host
+    const wasHost = room.hostSocketID === socketID;
+
     room.players.delete(socketID);
 
     // If room is empty, delete it
     if (room.players.size === 0) {
       this.rooms.delete(roomCode);
+      return { success: true };
+    }
+
+    // If the host left, reassign host to the player with the smallest ID
+    if (wasHost && room.players.size > 0) {
+      let smallestID = Infinity;
+      let newHostSocketID = null;
+      
+      room.players.forEach((player, socketId) => {
+        const playerIDNum = parseInt(player.id, 10);
+        if (!isNaN(playerIDNum) && playerIDNum < smallestID) {
+          smallestID = playerIDNum;
+          newHostSocketID = socketId;
+        }
+      });
+      
+      if (newHostSocketID) {
+        room.hostSocketID = newHostSocketID;
+        console.log(`Host reassigned to player ${smallestID} in room ${roomCode}`);
+      }
     }
 
     return { success: true };
@@ -152,6 +175,9 @@ export class GameManager {
       return { success: false, error: 'Player not found' };
     }
 
+    // Check if the disconnecting player is the host
+    const wasHost = room.hostSocketID === socketID;
+
     // Store disconnected player info for potential reconnection
     if (!room.disconnectedPlayers) {
       room.disconnectedPlayers = new Map();
@@ -163,10 +189,30 @@ export class GameManager {
       name: player.name,
       disconnectedAt: Date.now(),
       oldSocketID: socketID,
+      wasHost: wasHost, // Track if they were host for potential reconnection
     });
 
     // Remove from active players map
     room.players.delete(socketID);
+
+    // If the host disconnected, reassign host to the player with the smallest ID
+    if (wasHost && room.players.size > 0) {
+      let smallestID = Infinity;
+      let newHostSocketID = null;
+      
+      room.players.forEach((p, socketId) => {
+        const playerIDNum = parseInt(p.id, 10);
+        if (!isNaN(playerIDNum) && playerIDNum < smallestID) {
+          smallestID = playerIDNum;
+          newHostSocketID = socketId;
+        }
+      });
+      
+      if (newHostSocketID) {
+        room.hostSocketID = newHostSocketID;
+        console.log(`Host reassigned to player ${smallestID} in room ${roomCode} (previous host disconnected)`);
+      }
+    }
 
     return { success: true, playerName: player.name };
   }
@@ -267,6 +313,48 @@ export class GameManager {
         isHost: playerSocketId === hostSocketID
       };
     });
+  }
+
+  /**
+   * Reset room to lobby state (used when a player drops out during gameplay)
+   */
+  resetRoomToLobby(roomCode) {
+    const room = this.rooms.get(roomCode);
+    if (!room) {
+      return { success: false, error: 'Room not found' };
+    }
+
+    // Reset game state to lobby
+    room.gameState = {
+      gamePhase: 'lobby',
+      currentRound: 0,
+      turnOrder: [],
+      turnIndex: 0,
+      playerWires: {},
+      playerClaims: {},
+      setupReady: {},
+      playerReady: {},
+      playerRoles: {},
+      revealedWires: [],
+      defusingWires: [],
+      wireDeck: [],
+      allClaimsReady: false,
+      matchID: roomCode,
+    };
+
+    // Clear disconnected players
+    room.disconnectedPlayers = new Map();
+
+    // Reset all players' ready status
+    room.players.forEach((player, socketId) => {
+      room.players.set(socketId, {
+        ...player,
+        ready: false,
+      });
+    });
+
+    console.log(`Room ${roomCode} reset to lobby state`);
+    return { success: true };
   }
 
   /**

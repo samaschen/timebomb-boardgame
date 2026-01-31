@@ -227,8 +227,9 @@ function Lobby({
   // Show waiting room
   return (
     <div className="card">
-      {/* How to Play button - below title */}
-      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+      {/* Title row with How to Play button */}
+      <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+        <h1 style={{ margin: 0 }}>Waiting Room</h1>
         <button
           onClick={() => setShowHowToPlay(true)}
           style={{
@@ -239,6 +240,7 @@ function Lobby({
             border: 'none',
             borderRadius: '6px',
             cursor: 'pointer',
+            flexShrink: 0,
           }}
         >
           📖 How to Play
@@ -294,7 +296,6 @@ function Lobby({
         </div>
       )}
 
-      <h1>Waiting Room</h1>
       <div className="game-info">
         <p><strong>Room Code:</strong> {gameState?.matchID || roomCode}</p>
         <p><strong>Players:</strong> {players.length} / 8</p>
@@ -334,7 +335,7 @@ function Lobby({
           style={{ background: ready ? '#4CAF50' : '#ff9800' }}
           disabled={!socket}
         >
-          {ready ? '✓ READY' : 'Click to Ready'}
+          {ready ? '✓ READY' : 'Get Ready'}
         </button>
         <button
           className="share-link"
@@ -344,13 +345,13 @@ function Lobby({
             alert('Room link copied to clipboard!');
           }}
         >
-          Share Room Link
+          🔗 Room Link
         </button>
         <button
           onClick={onLeaveRoom}
           style={{ background: '#f44336' }}
         >
-          Exit Room
+          Exit ➜]
         </button>
         {isHost && (
           <button
@@ -358,7 +359,7 @@ function Lobby({
             disabled={!canStart || !socket}
             onClick={handleStartGame}
           >
-            Start Game
+            Start Game ▶️
           </button>
         )}
       </div>

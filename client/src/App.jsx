@@ -45,6 +45,8 @@ function App() {
   const [error, setError] = useState(null);
   const [connected, setConnected] = useState(false);
   const [attemptingRejoin, setAttemptingRejoin] = useState(false);
+  const [reconnectingPlayer, setReconnectingPlayer] = useState(null);
+  const [droppedPlayerMessage, setDroppedPlayerMessage] = useState(null);
 
   // Check for room code in URL or saved session
   useEffect(() => {
@@ -158,10 +160,30 @@ function App() {
     const handleRoomUpdated = (data) => {
       console.log('Room updated:', data);
       setPlayers(data.players || []);
+      // Clear reconnecting message when room is updated (player likely rejoined)
+      setReconnectingPlayer(null);
       if (data.gameState) {
         setGameState((prev) => {
           if (prev) {
-            return { ...prev, ...data.gameState };
+            // Merge game state but preserve sensitive player-specific data
+            // that shouldn't be overwritten by public state broadcasts
+            const merged = { ...prev, ...data.gameState };
+            // Preserve playerRoles if it exists in prev and new one is empty
+            if (prev.playerRoles && Object.keys(prev.playerRoles).length > 0 && 
+                (!data.gameState.playerRoles || Object.keys(data.gameState.playerRoles).length === 0)) {
+              merged.playerRoles = prev.playerRoles;
+            }
+            // Preserve playerWires if it exists in prev and new one is empty
+            if (prev.playerWires && Object.keys(prev.playerWires).length > 0 &&
+                (!data.gameState.playerWires || Object.keys(data.gameState.playerWires).length === 0)) {
+              merged.playerWires = prev.playerWires;
+            }
+            // Preserve wireDeck if it exists in prev and new one is empty
+            if (prev.wireDeck && prev.wireDeck.length > 0 &&
+                (!data.gameState.wireDeck || data.gameState.wireDeck.length === 0)) {
+              merged.wireDeck = prev.wireDeck;
+            }
+            return merged;
           }
           return data.gameState;
         });
@@ -196,6 +218,32 @@ function App() {
       // Could show a notification here if desired
     };
 
+    const handlePlayerReconnecting = (data) => {
+      console.log('Player reconnecting:', data);
+      setReconnectingPlayer(data.playerName);
+    };
+
+    const handlePlayerReconnected = (data) => {
+      console.log('Player reconnected:', data);
+      setReconnectingPlayer(null);
+    };
+
+    const handlePlayersUpdated = (data) => {
+      console.log('Players updated:', data);
+      setPlayers(data.players || []);
+    };
+
+    const handlePlayerDropped = (data) => {
+      console.log('Player dropped:', data);
+      setReconnectingPlayer(null);
+      setDroppedPlayerMessage(data.message);
+    };
+
+    const handleGameExitedToLobby = (data) => {
+      console.log('Game exited to lobby:', data);
+      // The game state will be updated by the game-state event
+    };
+
     const handleLeftRoom = () => {
       console.log('Left room successfully');
       // Clear all game state
@@ -218,6 +266,11 @@ function App() {
     newSocket.on('rejoin-success', handleRejoinSuccess);
     newSocket.on('rejoin-failed', handleRejoinFailed);
     newSocket.on('player-disconnected', handlePlayerDisconnected);
+    newSocket.on('player-reconnecting', handlePlayerReconnecting);
+    newSocket.on('player-reconnected', handlePlayerReconnected);
+    newSocket.on('players-updated', handlePlayersUpdated);
+    newSocket.on('player-dropped', handlePlayerDropped);
+    newSocket.on('game-exited-to-lobby', handleGameExitedToLobby);
     newSocket.on('left-room', handleLeftRoom);
 
     // Connection timeout
@@ -366,10 +419,87 @@ function App() {
     );
   }
 
+  // Player dropped popup component
+  const PlayerDroppedPopup = () => (
+    droppedPlayerMessage && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        background: 'rgba(0, 0, 0, 0.5)',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        zIndex: 1000,
+      }}>
+        <div style={{
+          background: 'white',
+          padding: 'clamp(16px, 4vw, 32px)',
+          borderRadius: '12px',
+          maxWidth: 'min(90vw, 400px)',
+          textAlign: 'center',
+          position: 'relative',
+          boxShadow: '0 4px 20px rgba(0, 0, 0, 0.3)',
+        }}>
+          <button
+            onClick={() => setDroppedPlayerMessage(null)}
+            style={{
+              position: 'absolute',
+              top: '8px',
+              right: '8px',
+              background: 'none',
+              border: 'none',
+              fontSize: '24px',
+              cursor: 'pointer',
+              color: '#666',
+              lineHeight: 1,
+              padding: '4px 8px',
+            }}
+          >
+            ×
+          </button>
+          <div style={{ fontSize: 'clamp(32px, 6vw, 48px)', marginBottom: '16px' }}>😔</div>
+          <h2 style={{ color: '#333', marginBottom: '12px', fontSize: 'clamp(16px, 3vw, 20px)' }}>
+            {droppedPlayerMessage}
+          </h2>
+          <p style={{ color: '#666', fontSize: 'clamp(12px, 2vw, 14px)', marginBottom: '8px' }}>
+            The game has been reset to the lobby.
+          </p>
+        </div>
+      </div>
+    )
+  );
+
+  // Reconnecting banner component
+  const ReconnectingBanner = () => (
+    reconnectingPlayer && (
+      <div style={{
+        position: 'fixed',
+        top: 0,
+        left: 0,
+        right: 0,
+        background: '#ff9800',
+        color: 'white',
+        padding: '10px 16px',
+        textAlign: 'center',
+        zIndex: 999,
+        fontSize: 'clamp(12px, 2vw, 14px)',
+        fontWeight: 'bold',
+        boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
+      }}>
+        ⏳ {reconnectingPlayer} is reconnecting... (30s timeout)
+      </div>
+    )
+  );
+
   // Show lobby if not in a game
   if (!gameState || gameState.gamePhase === 'lobby') {
     return (
       <div className="app-container">
+        <PlayerDroppedPopup />
+        <ReconnectingBanner />
         <Lobby
           socket={socket}
           connected={connected}
@@ -391,6 +521,8 @@ function App() {
   // Show game board
   return (
     <div className="app-container">
+      <PlayerDroppedPopup />
+      <ReconnectingBanner />
       <GameBoard
         socket={socket}
         gameState={gameState}
