@@ -113,6 +113,7 @@ function Lobby({
   gameState,
   onCreateRoom,
   onJoinRoom,
+  onLeaveRoom,
 }) {
   const [ready, setReady] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
@@ -225,25 +226,24 @@ function Lobby({
 
   // Show waiting room
   return (
-    <div className="card" style={{ position: 'relative' }}>
-      {/* How to Play button - top right corner */}
-      <button
-        onClick={() => setShowHowToPlay(true)}
-        style={{
-          position: 'absolute',
-          top: '12px',
-          right: '12px',
-          padding: '8px 12px',
-          fontSize: '12px',
-          background: '#9c27b0',
-          color: 'white',
-          border: 'none',
-          borderRadius: '6px',
-          cursor: 'pointer',
-        }}
-      >
-        📖 How to Play
-      </button>
+    <div className="card">
+      {/* How to Play button - below title */}
+      <div style={{ display: 'flex', justifyContent: 'flex-end', marginBottom: '8px' }}>
+        <button
+          onClick={() => setShowHowToPlay(true)}
+          style={{
+            padding: '6px 10px',
+            fontSize: 'clamp(10px, 1.5vw, 12px)',
+            background: '#9c27b0',
+            color: 'white',
+            border: 'none',
+            borderRadius: '6px',
+            cursor: 'pointer',
+          }}
+        >
+          📖 How to Play
+        </button>
+      </div>
 
       {/* How to Play Modal */}
       {showHowToPlay && (
@@ -267,14 +267,9 @@ function Lobby({
             className="how-to-play-modal"
             style={{
               background: 'white',
-              borderRadius: '20px',
-              padding: '24px',
-              maxWidth: '950px',
-              maxHeight: '56vh',
+              borderRadius: '12px',
               overflow: 'auto',
               boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
-              transform: 'scale(0.5)',
-              transformOrigin: 'center center',
             }}
             onClick={(e) => e.stopPropagation()}
           >
@@ -350,6 +345,12 @@ function Lobby({
           }}
         >
           Share Room Link
+        </button>
+        <button
+          onClick={onLeaveRoom}
+          style={{ background: '#f44336' }}
+        >
+          Exit Room
         </button>
         {isHost && (
           <button

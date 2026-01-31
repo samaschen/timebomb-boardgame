@@ -381,76 +381,157 @@ h2 {
 }
 
 /* ===========================================
-   RESPONSIVE SCALING
-   Base: the original scale(0.75) = 75% size
-   - Desktop/Laptop (3x larger): 0.75 * 3 = 2.25 scale
-   - Mobile/Phone (1.2x larger): 0.75 * 1.2 = 0.9 scale
+   RESPONSIVE SIZING - Fluid viewport-based
+   Uses clamp() for smooth scaling across all devices
+   No transform scaling - natural CSS flow
    =========================================== */
 
-/* Mobile/Phone - screens narrower than 768px (default, mobile-first) */
+/* App container - no transform, natural flow */
 .app-container {
-  transform: scale(0.9);
-  transform-origin: top center;
+  width: 100%;
+  max-width: min(95vw, 600px);
+  margin: 0 auto;
+  padding: clamp(8px, 2vw, 20px);
 }
 
-/* Desktop/Laptop - screens 768px and wider */
-@media (min-width: 768px) {
-  .app-container {
-    transform: scale(2.25);
-    transform-origin: center center;
-  }
-  
-  #root {
-    overflow: visible;
-    min-height: 100vh;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  
-  body {
-    min-height: 100vh;
-    overflow: auto;
-  }
+/* Fluid typography */
+html {
+  font-size: clamp(14px, 2vw, 18px);
+}
+
+/* Card responsive sizing */
+.card {
+  max-width: min(95vw, 550px);
+  padding: clamp(12px, 3vw, 24px);
+}
+
+/* Button responsive sizing */
+button {
+  padding: clamp(8px, 1.5vw, 12px) clamp(12px, 2vw, 24px);
+  font-size: clamp(12px, 1.8vw, 16px);
+}
+
+.start-game {
+  font-size: clamp(14px, 2vw, 18px);
+  padding: clamp(10px, 2vw, 16px) clamp(16px, 3vw, 32px);
+}
+
+/* Input responsive sizing */
+input {
+  padding: clamp(8px, 1.5vw, 12px);
+  font-size: clamp(14px, 1.8vw, 16px);
+  max-width: min(100%, 300px);
+}
+
+/* Headings responsive */
+h1 {
+  font-size: clamp(20px, 4vw, 32px);
+  margin-bottom: clamp(12px, 2vw, 24px);
+}
+
+h2 {
+  font-size: clamp(16px, 3vw, 24px);
+  margin-bottom: clamp(8px, 1.5vw, 16px);
+}
+
+/* Player list items */
+.player-item {
+  padding: clamp(8px, 1.5vw, 12px);
+  font-size: clamp(12px, 1.6vw, 16px);
+}
+
+/* Wire cards responsive */
+.wire-card {
+  width: clamp(50px, 10vw, 80px);
+  height: clamp(65px, 12vw, 100px);
+  font-size: clamp(10px, 1.5vw, 14px);
+}
+
+/* Game info sections */
+.game-info {
+  padding: clamp(8px, 2vw, 16px);
+  margin: clamp(8px, 1.5vw, 16px) 0;
+  font-size: clamp(12px, 1.6vw, 16px);
+}
+
+/* Button group */
+.button-group {
+  gap: clamp(6px, 1.5vw, 12px);
+  margin: clamp(8px, 2vw, 16px) 0;
+}
+
+.button-group button {
+  min-width: clamp(80px, 15vw, 120px);
+}
+
+/* Defusing wire tags */
+.defusing-wire-tag {
+  padding: clamp(4px, 1vw, 8px) clamp(6px, 1.5vw, 12px);
+  font-size: clamp(10px, 1.4vw, 14px);
+}
+
+/* Winner/loser banners */
+.winner-banner,
+.loser-banner {
+  padding: clamp(12px, 3vw, 24px);
+  font-size: clamp(16px, 3vw, 24px);
+}
+
+/* Ready player items */
+.ready-player-item {
+  padding: clamp(8px, 1.5vw, 12px) clamp(10px, 2vw, 16px);
+  gap: clamp(6px, 1.5vw, 12px);
+}
+
+.player-status-icon {
+  width: clamp(24px, 4vw, 32px);
+  height: clamp(24px, 4vw, 32px);
+}
+
+.player-name {
+  font-size: clamp(12px, 1.6vw, 16px);
+}
+
+.player-status-text {
+  font-size: clamp(10px, 1.4vw, 14px);
 }
 
 /* ===========================================
    HOW TO PLAY MODAL - RESPONSIVE SIZING
    =========================================== */
 
-/* Mobile/Phone - screens narrower than 768px */
-@media (max-width: 767px) {
-  .how-to-play-modal {
-    transform: scale(1) !important;
-    max-width: 90vw !important;
-    max-height: 75vh !important;
-    padding: 16px !important;
-    width: 90vw !important;
-  }
-  
-  .how-to-play-modal h2 {
-    font-size: 18px !important;
-    margin-bottom: 12px !important;
-  }
-  
-  .how-to-play-modal h3 {
-    font-size: 14px !important;
-    margin-top: 14px !important;
-    margin-bottom: 6px !important;
-  }
-  
-  .how-to-play-modal p,
-  .how-to-play-modal li,
-  .how-to-play-modal td,
-  .how-to-play-modal th {
-    font-size: 12px !important;
-  }
-  
-  .how-to-play-modal table {
-    font-size: 11px !important;
-  }
-  
-  .how-to-play-modal ul {
-    padding-left: 16px !important;
-  }
+.how-to-play-modal {
+  max-width: min(90vw, 500px);
+  max-height: 80vh;
+  padding: clamp(12px, 3vw, 24px);
+  font-size: clamp(11px, 1.5vw, 14px);
+}
+
+.how-to-play-modal h2 {
+  font-size: clamp(16px, 2.5vw, 22px);
+  margin-bottom: clamp(8px, 2vw, 16px);
+}
+
+.how-to-play-modal h3 {
+  font-size: clamp(12px, 1.8vw, 16px);
+  margin-top: clamp(10px, 2vw, 20px);
+  margin-bottom: clamp(4px, 1vw, 8px);
+}
+
+.how-to-play-modal ul {
+  padding-left: clamp(12px, 2vw, 20px);
+}
+
+.how-to-play-modal table {
+  font-size: clamp(10px, 1.3vw, 13px);
+}
+
+/* Ensure root doesn't have conflicting styles */
+#root {
+  min-height: 100vh;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding: clamp(10px, 2vw, 20px);
+  overflow: auto;
 }

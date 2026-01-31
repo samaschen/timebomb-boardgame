@@ -113,6 +113,45 @@ io.on('connection', (socket) => {
     }
   });
 
+  // Leave room (exit to join/create page)
+  socket.on('leave-room', () => {
+    const roomCode = socket.roomCode;
+    const playerID = socket.playerID;
+    
+    if (!roomCode) {
+      socket.emit('left-room');
+      return;
+    }
+
+    const result = gameManager.leaveRoom(roomCode, socket.id);
+    if (result.success) {
+      socket.leave(roomCode);
+      
+      // Clear socket's room data
+      socket.roomCode = null;
+      socket.playerID = null;
+      
+      // Notify the player they've left
+      socket.emit('left-room');
+      
+      // Notify remaining players
+      const roomPlayers = gameManager.getRoomPlayers(roomCode);
+      const publicState = gameManager.getPublicState(roomCode);
+      
+      if (roomPlayers) {
+        io.to(roomCode).emit('room-updated', {
+          players: roomPlayers,
+          gameState: publicState,
+        });
+        io.to(roomCode).emit('player-left', { playerID });
+      }
+      
+      console.log(`Player ${playerID} left room ${roomCode}`);
+    } else {
+      socket.emit('left-room'); // Still let them leave on client side
+    }
+  });
+
   // Start the game
   socket.on('start-game', () => {
     const roomCode = socket.roomCode;

@@ -37,6 +37,7 @@ export class GameManager {
       room = {
         code: roomCode,
         players: new Map(), // socketID -> { id, name, ready }
+        nextPlayerID: 0, // Counter for unique player IDs (prevents collision when players leave/rejoin)
         gameState: {
           matchID: roomCode, // Store room code for display
           gamePhase: 'lobby',
@@ -66,6 +67,19 @@ export class GameManager {
       this.rooms.set(roomCode, room);
     }
     
+    // Ensure nextPlayerID exists (for rooms created before this update)
+    if (room.nextPlayerID === undefined) {
+      // Find max existing ID and set nextPlayerID to max + 1
+      let maxID = -1;
+      room.players.forEach((player) => {
+        const id = parseInt(player.id, 10);
+        if (!isNaN(id) && id > maxID) {
+          maxID = id;
+        }
+      });
+      room.nextPlayerID = maxID + 1;
+    }
+    
     // Ensure cardPositionMappings exists (for rooms created before this update)
     if (!room.cardPositionMappings) {
       room.cardPositionMappings = new Map();
@@ -88,8 +102,9 @@ export class GameManager {
       return { success: false, error: `Name "${playerName}" is already taken. Please choose a different name.` };
     }
 
-    // Assign player ID (use index in players map)
-    const playerID = room.players.size.toString();
+    // Assign player ID using the counter (prevents collision when players leave/rejoin)
+    const playerID = room.nextPlayerID.toString();
+    room.nextPlayerID++; // Increment for next player
 
     // Add player
     room.players.set(socketID, {
@@ -203,8 +218,15 @@ export class GameManager {
         return { success: false, error: 'Room is full (max 8 players)' };
       }
 
-      // Assign new player ID
-      const playerID = room.players.size.toString();
+      // Ensure nextPlayerID exists
+      if (room.nextPlayerID === undefined) {
+        room.nextPlayerID = 0;
+      }
+
+      // Assign new player ID using counter (prevents collision)
+      const playerID = room.nextPlayerID.toString();
+      room.nextPlayerID++;
+      
       room.players.set(socketID, {
         id: playerID,
         name: playerName,

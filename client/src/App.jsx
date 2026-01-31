@@ -196,6 +196,17 @@ function App() {
       // Could show a notification here if desired
     };
 
+    const handleLeftRoom = () => {
+      console.log('Left room successfully');
+      // Clear all game state
+      setGameState(null);
+      setPlayers([]);
+      setPlayerID(null);
+      setRoomCode('');
+      // Clear session storage
+      clearSession();
+    };
+
     // Set up event listeners
     newSocket.on('connect', handleConnect);
     newSocket.on('connect_error', handleConnectError);
@@ -207,6 +218,7 @@ function App() {
     newSocket.on('rejoin-success', handleRejoinSuccess);
     newSocket.on('rejoin-failed', handleRejoinFailed);
     newSocket.on('player-disconnected', handlePlayerDisconnected);
+    newSocket.on('left-room', handleLeftRoom);
 
     // Connection timeout
     connectionTimeout = setTimeout(() => {
@@ -316,6 +328,19 @@ function App() {
     // Server's 'new-game' handler now resets everyone
   };
 
+  // Handle leaving the room
+  const handleLeaveRoom = () => {
+    if (socket) {
+      socket.emit('leave-room');
+    }
+    // Clear session immediately (server will also confirm via 'left-room' event)
+    clearSession();
+    setGameState(null);
+    setPlayers([]);
+    setPlayerID(null);
+    setRoomCode('');
+  };
+
   // Show reconnecting indicator if attempting to rejoin
   if (attemptingRejoin) {
     return (
@@ -357,6 +382,7 @@ function App() {
           gameState={gameState}
           onCreateRoom={handleCreateRoom}
           onJoinRoom={handleJoinRoom}
+          onLeaveRoom={handleLeaveRoom}
         />
       </div>
     );
