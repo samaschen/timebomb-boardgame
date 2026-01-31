@@ -2,6 +2,8 @@ import React, { useState, useEffect } from 'react';
 import { io } from 'socket.io-client';
 import Lobby from './components/Lobby';
 import GameBoard from './components/GameBoard';
+import LanguageSelector from './components/LanguageSelector';
+import { useTranslation } from './i18n/LanguageContext';
 
 // In production (on Render), client and server are on the same origin, so use empty string
 // In development, use localhost:8000
@@ -36,6 +38,7 @@ const clearSession = () => {
 };
 
 function App() {
+  const { t } = useTranslation();
   const [socket, setSocket] = useState(null);
   const [playerName, setPlayerName] = useState('');
   const [roomCode, setRoomCode] = useState('');
@@ -398,10 +401,11 @@ function App() {
   if (attemptingRejoin) {
     return (
       <div className="app-container">
+        <LanguageSelector />
         <div className="card" style={{ textAlign: 'center', padding: '40px' }}>
-          <h2>Reconnecting...</h2>
+          <h2>{t('reconnect.reconnecting')}</h2>
           <p style={{ marginTop: '16px', color: '#666' }}>
-            Attempting to rejoin your game session
+            {t('reconnect.attemptingRejoin')}
           </p>
           <div style={{ marginTop: '24px' }}>
             <div style={{
@@ -465,7 +469,7 @@ function App() {
             {droppedPlayerMessage}
           </h2>
           <p style={{ color: '#666', fontSize: 'clamp(12px, 2vw, 14px)', marginBottom: '8px' }}>
-            The game has been reset to the lobby.
+            {t('reconnect.playerDropped')}
           </p>
         </div>
       </div>
@@ -489,7 +493,7 @@ function App() {
         fontWeight: 'bold',
         boxShadow: '0 2px 8px rgba(0, 0, 0, 0.2)',
       }}>
-        ⏳ {reconnectingPlayer} is reconnecting... (30s timeout)
+        {t('reconnect.playerReconnecting', { playerName: reconnectingPlayer })}
       </div>
     )
   );
@@ -498,6 +502,7 @@ function App() {
   if (!gameState || gameState.gamePhase === 'lobby') {
     return (
       <div className="app-container">
+        <LanguageSelector />
         <PlayerDroppedPopup />
         <ReconnectingBanner />
         <Lobby
@@ -521,6 +526,7 @@ function App() {
   // Show game board
   return (
     <div className="app-container">
+      <LanguageSelector />
       <PlayerDroppedPopup />
       <ReconnectingBanner />
       <GameBoard

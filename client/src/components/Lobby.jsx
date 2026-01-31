@@ -1,31 +1,32 @@
 import React, { useState, useEffect } from 'react';
+import { useTranslation } from '../i18n/LanguageContext';
 
 // How to Play content component
-const HowToPlayContent = () => (
+const HowToPlayContent = ({ t }) => (
   <div style={{ textAlign: 'left', fontSize: '14px', lineHeight: '1.6' }}>
-    <h2 style={{ marginBottom: '16px', textAlign: 'center' }}>🎮 How to Play</h2>
+    <h2 style={{ marginBottom: '16px', textAlign: 'center' }}>{t('howToPlay.title')}</h2>
     
-    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>Overview</h3>
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.overview')}</h3>
     <p style={{ marginBottom: '12px' }}>
-      Time Bomb is a social deduction game where players are secretly divided into two teams:
+      {t('howToPlay.overviewDesc')}
     </p>
     <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
-      <li><strong>Good Team (SWAT)</strong>: Find all the defusing wires before time runs out</li>
-      <li><strong>Bad Team (Terrorists)</strong>: Prevent the Good Team from winning, ideally by triggering the bomb</li>
+      <li><strong>{t('howToPlay.goodTeamLabel')}</strong>: {t('howToPlay.goodTeamDesc')}</li>
+      <li><strong>{t('howToPlay.badTeamLabel')}</strong>: {t('howToPlay.badTeamDesc')}</li>
     </ul>
     <p style={{ marginBottom: '16px', fontStyle: 'italic' }}>
-      Players don't know each other's roles. Communication, bluffing, and deduction are key!
+      {t('howToPlay.socialDeductionNote')}
     </p>
 
-    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>👥 Teams & Roles</h3>
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.teamsRoles')}</h3>
     <p style={{ marginBottom: '8px' }}>
-      Players are secretly divided into two teams — <em>you won't know who's on which team!</em>
+      {t('howToPlay.teamsRolesDesc')}
     </p>
     <table style={{ width: '100%', marginBottom: '12px', borderCollapse: 'collapse', fontSize: '13px' }}>
       <thead>
         <tr style={{ background: '#f5f5f5' }}>
-          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Players</th>
-          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Distribution</th>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{t('howToPlay.playersHeader')}</th>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>{t('howToPlay.distributionHeader')}</th>
         </tr>
       </thead>
       <tbody>
@@ -37,66 +38,66 @@ const HowToPlayContent = () => (
       </tbody>
     </table>
 
-    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>🃏 The Cards</h3>
-    <p style={{ marginBottom: '8px' }}>For <strong>X players</strong>, the deck contains <strong>5X cards</strong>:</p>
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.theCards')}</h3>
+    <p style={{ marginBottom: '8px' }}>{t('howToPlay.cardsDesc')}</p>
     <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
-      <li>🟢 <strong>X Defusing Wires</strong></li>
-      <li>💣 <strong>1 Bomb</strong></li>
-      <li>⚪ <strong>4X - 1 Safe Wires</strong></li>
+      <li>🟢 <strong>{t('howToPlay.defusingWires')}</strong></li>
+      <li>💣 <strong>{t('howToPlay.oneBomb')}</strong></li>
+      <li>⚪ <strong>{t('howToPlay.safeWires')}</strong></li>
     </ul>
     <p style={{ marginBottom: '16px' }}>
-      Each player starts with <strong>5 cards</strong> (Round 1), then <strong>4 → 3 → 2</strong> in later rounds.
+      {t('howToPlay.cardsPerRound')}
     </p>
 
-    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>🔄 Game Flow</h3>
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.gameFlow')}</h3>
     
-    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>Setup Phase</p>
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>{t('howToPlay.setupPhase')}</p>
     <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
-      <li>View your secret role and cards</li>
-      <li>Claim how many defusing wires you have — everyone sees your claim <em>(you can lie!)</em></li>
-      <li>Click "Ready" when done</li>
+      <li>{t('howToPlay.setupStep1')}</li>
+      <li>{t('howToPlay.setupStep2')}</li>
+      <li>{t('howToPlay.setupStep3')}</li>
     </ul>
 
-    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>Playing Phase</p>
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>{t('howToPlay.playingPhase')}</p>
     <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
-      <li>Players take turns in random order (1 turn each per round)</li>
-      <li>On your turn: cut one wire from another player <em>(not yourself!)</em></li>
-      <li>The wire is revealed to everyone</li>
+      <li>{t('howToPlay.playingStep1')}</li>
+      <li>{t('howToPlay.playingStep2')}</li>
+      <li>{t('howToPlay.playingStep3')}</li>
     </ul>
 
-    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>Between Rounds</p>
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>{t('howToPlay.betweenRounds')}</p>
     <ul style={{ marginBottom: '16px', paddingLeft: '20px' }}>
-      <li>Unrevealed cards are reshuffled and redealt (1 fewer card per player)</li>
-      <li>Found defusing wires stay revealed permanently</li>
-      <li>The bomb stays hidden if not yet cut</li>
+      <li>{t('howToPlay.betweenStep1')}</li>
+      <li>{t('howToPlay.betweenStep2')}</li>
+      <li>{t('howToPlay.betweenStep3')}</li>
     </ul>
 
-    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>🏆 Win Conditions</h3>
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.winConditions')}</h3>
     <table style={{ width: '100%', marginBottom: '16px', borderCollapse: 'collapse', fontSize: '13px' }}>
       <thead>
         <tr style={{ background: '#f5f5f5' }}>
-          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Team</th>
-          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>How to Win</th>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>{t('howToPlay.teamHeader')}</th>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>{t('howToPlay.howToWinHeader')}</th>
         </tr>
       </thead>
       <tbody>
         <tr>
-          <td style={{ padding: '6px', border: '1px solid #ddd' }}>🟢 Good Team</td>
-          <td style={{ padding: '6px', border: '1px solid #ddd' }}>Reveal ALL defusing wires before Round 4 ends</td>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>{t('howToPlay.goodTeamName')}</td>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>{t('howToPlay.goodTeamWin')}</td>
         </tr>
         <tr>
-          <td style={{ padding: '6px', border: '1px solid #ddd' }}>🔴 Bad Team</td>
-          <td style={{ padding: '6px', border: '1px solid #ddd' }}>Bomb is revealed OR Round 4 ends without all defusing wires</td>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>{t('howToPlay.badTeamName')}</td>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>{t('howToPlay.badTeamWin')}</td>
         </tr>
       </tbody>
     </table>
 
-    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>💡 Tips</h3>
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.tips')}</h3>
     <ul style={{ paddingLeft: '20px' }}>
-      <li>🔍 Watch claims closely — who's lying?</li>
-      <li>🤔 Good Team players may also lie if they have the 💣 in their hand that round</li>
-      <li>🤔 Bad Team players may cut defusing wires to blend in, cut safe wires to stall, or reveal their identity at the "right" moment</li>
-      <li>🗣️ Communicate, but trust wisely!</li>
+      <li>{t('howToPlay.tip1')}</li>
+      <li>{t('howToPlay.tip2')}</li>
+      <li>{t('howToPlay.tip3')}</li>
+      <li>{t('howToPlay.tip4')}</li>
     </ul>
   </div>
 );
@@ -115,6 +116,7 @@ function Lobby({
   onJoinRoom,
   onLeaveRoom,
 }) {
+  const { t } = useTranslation();
   const [ready, setReady] = useState(false);
   const [showHowToPlay, setShowHowToPlay] = useState(false);
   const isHost = players.length > 0 && players[0].id === playerID;
@@ -144,30 +146,30 @@ function Lobby({
   if (!gameState || players.length === 0) {
     return (
       <div className="card">
-        <h1>Time Bomb Game</h1>
+        <h1>{t('lobby.title')}</h1>
         <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px', fontSize: '14px' }}>
-          Welcome to the Time Bomb board game! 💣🎉🤩
+          {t('lobby.welcome')}
         </p>
         {!connected && (
           <p style={{ color: '#ff9800', marginBottom: '16px' }}>
-            Connecting to server... {socket ? '(Attempting connection)' : '(Initializing)'}
+            {t('common.connecting')} {socket ? t('lobby.attemptingConnection') : t('lobby.initializing')}
           </p>
         )}
         <div style={{ marginBottom: '16px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-            Your Name:
+            {t('lobby.yourName')}
           </label>
           <input
             type="text"
             value={playerName}
             onChange={(e) => setPlayerName(e.target.value)}
-            placeholder="Enter your name"
+            placeholder={t('lobby.enterName')}
             maxLength={20}
           />
         </div>
         <div style={{ marginBottom: '24px' }}>
           <label style={{ display: 'block', marginBottom: '8px', fontWeight: '600' }}>
-            Room Code (leave empty to create new room):
+            {t('lobby.roomCode')}
           </label>
           <input
             type="text"
@@ -177,13 +179,13 @@ function Lobby({
               const value = e.target.value.replace(/[^A-Za-z]/g, '').toUpperCase().slice(0, 6);
               setRoomCode(value);
             }}
-            placeholder="Enter 6-letter code (e.g., ABCDEF)"
+            placeholder={t('lobby.enterRoomCode')}
             maxLength={6}
             style={{ textTransform: 'uppercase', letterSpacing: '2px', fontFamily: 'monospace' }}
           />
           {roomCode.length > 0 && roomCode.length < 6 && (
             <p style={{ fontSize: '12px', color: '#666', marginTop: '4px' }}>
-              {6 - roomCode.length} more letter{6 - roomCode.length !== 1 ? 's' : ''} needed
+              {t('lobby.lettersNeeded', { count: 6 - roomCode.length })}
             </p>
           )}
         </div>
@@ -192,28 +194,21 @@ function Lobby({
             onClick={onCreateRoom}
             style={{ background: '#2196F3' }}
             disabled={!socket || !playerName.trim()}
-            title={!socket ? 'Connecting to server...' : !playerName.trim() ? 'Please enter your name' : ''}
           >
-            Create Room
+            {t('lobby.createRoom')}
           </button>
           <button
             onClick={onJoinRoom}
             style={{ background: '#4CAF50' }}
             disabled={!socket || !playerName.trim() || !roomCode.trim() || roomCode.length !== 6}
-            title={
-              !socket ? 'Connecting to server...' :
-              !playerName.trim() ? 'Please enter your name' :
-              !roomCode.trim() ? 'Please enter a room code' :
-              roomCode.length !== 6 ? 'Room code must be 6 letters' : ''
-            }
           >
-            Join Room
+            {t('lobby.joinRoom')}
           </button>
         </div>
         {!connected && (
           <div style={{ marginTop: '16px', padding: '12px', background: '#fff3cd', borderRadius: '8px' }}>
             <p style={{ fontSize: '14px', color: '#856404', margin: 0 }}>
-              <strong>Connection Issue:</strong> Make sure the server is running. Open a terminal and run:
+              <strong>{t('common.connectionIssue')}:</strong> {t('lobby.connectingNote')}
             </p>
             <code style={{ display: 'block', marginTop: '8px', padding: '8px', background: '#fff', borderRadius: '4px' }}>
               npm run dev
@@ -229,7 +224,7 @@ function Lobby({
     <div className="card">
       {/* Title row with How to Play button */}
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
-        <h1 style={{ margin: 0 }}>Waiting Room</h1>
+        <h1 style={{ margin: 0 }}>{t('lobby.waitingRoom')}</h1>
         <button
           onClick={() => setShowHowToPlay(true)}
           style={{
@@ -243,7 +238,7 @@ function Lobby({
             flexShrink: 0,
           }}
         >
-          📖 How to Play
+          {t('lobby.howToPlay')}
         </button>
       </div>
 
@@ -275,7 +270,7 @@ function Lobby({
             }}
             onClick={(e) => e.stopPropagation()}
           >
-            <HowToPlayContent />
+            <HowToPlayContent t={t} />
             <div style={{ textAlign: 'center', marginTop: '20px' }}>
               <button
                 onClick={() => setShowHowToPlay(false)}
@@ -289,7 +284,7 @@ function Lobby({
                   cursor: 'pointer',
                 }}
               >
-                Got it!
+                {t('common.gotIt')}
               </button>
             </div>
           </div>
@@ -297,21 +292,21 @@ function Lobby({
       )}
 
       <div className="game-info">
-        <p><strong>Room Code:</strong> {gameState?.matchID || roomCode}</p>
-        <p><strong>Players:</strong> {players.length} / 8</p>
+        <p><strong>{t('lobby.roomCode').replace(' (leave empty to create new room):', '')}:</strong> {gameState?.matchID || roomCode}</p>
+        <p><strong>{t('common.players')}:</strong> {players.length} / 8</p>
         {players.length < 4 && (
           <p style={{ color: '#f44336', marginTop: '8px' }}>
-            Need at least 4 players to start
+            {t('lobby.needPlayers')}
           </p>
         )}
       </div>
 
-      <h2>Players in Room:</h2>
+      <h2>{t('lobby.playersInRoom')}</h2>
       <ul className="player-list">
         {players.map((player) => {
           const isCurrentPlayer = player.id === playerID;
           const playerReady = gameState?.playerReady?.[player.id] || false;
-          const isHost = player.isHost || false;
+          const isHostPlayer = player.isHost || false;
           return (
             <li
               key={player.id}
@@ -319,10 +314,10 @@ function Lobby({
             >
               <span>
                 {player.name || `Player ${player.id}`}
-                {isHost && <span style={{ marginLeft: '8px', color: '#FF9800', fontWeight: 'bold', fontSize: '12px' }}>(Host)</span>}
+                {isHostPlayer && <span style={{ marginLeft: '8px', color: '#FF9800', fontWeight: 'bold', fontSize: '12px' }}>{t('common.host')}</span>}
               </span>
               <span className="ready-status">
-                {playerReady ? '✓ READY' : 'Not Ready'}
+                {playerReady ? t('lobby.readyStatus') : t('common.notReady')}
               </span>
             </li>
           );
@@ -335,23 +330,23 @@ function Lobby({
           style={{ background: ready ? '#4CAF50' : '#ff9800' }}
           disabled={!socket}
         >
-          {ready ? '✓ READY' : 'Get Ready'}
+          {ready ? t('lobby.readyStatus') : t('lobby.getReady')}
         </button>
         <button
           className="share-link"
           onClick={() => {
             const url = `${window.location.origin}${window.location.pathname}?room=${roomCode}`;
             navigator.clipboard.writeText(url);
-            alert('Room link copied to clipboard!');
+            alert(t('lobby.linkCopied'));
           }}
         >
-          🔗 Room Link
+          {t('lobby.roomLink')}
         </button>
         <button
           onClick={onLeaveRoom}
           style={{ background: '#f44336' }}
         >
-          Exit ➜]
+          {t('lobby.exit')}
         </button>
         {isHost && (
           <button
@@ -359,7 +354,7 @@ function Lobby({
             disabled={!canStart || !socket}
             onClick={handleStartGame}
           >
-            Start Game ▶️
+            {t('lobby.startGame')}
           </button>
         )}
       </div>

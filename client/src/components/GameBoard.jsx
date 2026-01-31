@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useTranslation } from '../i18n/LanguageContext';
 
 // Clear session storage when starting a new game
 const clearGameSession = () => {
@@ -8,6 +9,7 @@ const clearGameSession = () => {
 };
 
 function GameBoard({ socket, gameState, players, playerID, playerName, onReturnToLobby }) {
+  const { t } = useTranslation();
   const [selectedPlayer, setSelectedPlayer] = useState(null);
   const [selectedWireIndex, setSelectedWireIndex] = useState(null);
   const [claimValue, setClaimValue] = useState('');
@@ -131,10 +133,10 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
         }}>
           <div style={{ fontSize: 'clamp(32px, 6vw, 48px)', marginBottom: '16px' }}>⚠️</div>
           <h2 style={{ color: '#333', marginBottom: '16px', fontSize: 'clamp(16px, 3vw, 20px)' }}>
-            Exit to Lobby?
+            {t('game.exitConfirmTitle')}
           </h2>
           <p style={{ color: '#666', fontSize: 'clamp(12px, 2vw, 14px)', marginBottom: '24px' }}>
-            Are you sure you want to return to the Lobby? This will end the game for everyone.
+            {t('game.exitConfirmMessage')}
           </p>
           <div style={{ display: 'flex', gap: '12px', justifyContent: 'center' }}>
             <button
@@ -150,7 +152,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 fontWeight: 'bold',
               }}
             >
-              No
+              {t('common.no')}
             </button>
             <button
               onClick={handleExitToLobby}
@@ -165,7 +167,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 fontWeight: 'bold',
               }}
             >
-              Yes
+              {t('common.yes')}
             </button>
           </div>
         </div>
@@ -188,7 +190,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
           cursor: 'pointer',
         }}
       >
-        🚪 Exit to Lobby
+        {t('game.exitToLobby')}
       </button>
     </div>
   );
@@ -196,7 +198,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
   // NOW we can do early returns - all hooks are above this point
   if (!gameState) {
     console.log('GameBoard - No gameState, showing loading');
-    return <div className="card">Loading game...</div>;
+    return <div className="card">{t('common.loading')}</div>;
   }
 
   const G = gameState;
@@ -227,24 +229,24 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
     const allPlayersReady = players.length > 0 && players.every((p) => G.setupReady?.[p.id] === true);
 
     return (
-      <div className="card game-board-card">
-        <h1>Game Setup</h1>
+      <div className="card game-board-card" style={{ marginTop: 'clamp(30px, 5vw, 50px)' }}>
+        <h1>{t('game.gameSetup')}</h1>
         <div className="game-info">
           <p>
-            Your role: <strong style={{ 
+            {t('game.yourRole')} <strong style={{ 
               color: G.playerRoles?.[playerID?.toString()] === 'good' ? '#4CAF50' : '#f44336',
             }}>
               {(() => {
                 const role = G.playerRoles?.[playerID?.toString()];
-                if (role === 'good') return 'Good Team ✓';
-                if (role === 'bad') return 'Bad Team ✗';
-                return 'Loading...';
+                if (role === 'good') return t('game.goodTeam');
+                if (role === 'bad') return t('game.badTeam');
+                return t('common.loading');
               })()}
             </strong>
           </p>
           {!G.playerRoles?.[playerID?.toString()] && (
             <p style={{ fontSize: 'clamp(10px, 1.5vw, 12px)', color: '#999', marginTop: '4px' }}>
-              Waiting for role assignment...
+              {t('game.waitingForRole')}
             </p>
           )}
         </div>
@@ -252,15 +254,15 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
         {reshuffleAnimating ? (
           <div style={{ textAlign: 'center', padding: '40px' }}>
             <div className="reshuffle-animation">
-              <h2>🔄 Reshuffling Cards...</h2>
-              <p>Cards are being reshuffled for the next round</p>
+              <h2>{t('game.reshuffling')}</h2>
+              <p>{t('game.reshufflingDesc')}</p>
             </div>
           </div>
         ) : (!viewedCards || showAllCards) ? (
           <>
-            <h2>Your Cards:</h2>
+            <h2>{t('game.yourCards')}</h2>
             <p style={{ marginBottom: '12px', color: '#666', fontSize: '14px' }}>
-              Remember your cards before clicking "I've Viewed My Cards"!
+              {t('game.rememberCards')}
             </p>
             <div className="wire-row">
               {playerWires.map((wireIndex, idx) => {
@@ -280,19 +282,19 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                     {wire.type === 'defusing' && (
                       <>
                         <div style={{ fontSize: 'clamp(16px, 4vw, 24px)', marginBottom: '4px' }}>✓</div>
-                        <div style={{ fontWeight: 'bold' }}>DEFUSING</div>
+                        <div style={{ fontWeight: 'bold' }}>{t('game.defusing')}</div>
                       </>
                     )}
                     {wire.type === 'safe' && (
                       <>
                         <div style={{ fontSize: 'clamp(16px, 4vw, 24px)', marginBottom: '4px' }}>○</div>
-                        <div style={{ fontWeight: 'bold' }}>SAFE</div>
+                        <div style={{ fontWeight: 'bold' }}>{t('game.safe')}</div>
                       </>
                     )}
                     {wire.type === 'bomb' && (
                       <>
                         <div style={{ fontSize: 'clamp(20px, 5vw, 32px)', marginBottom: '4px' }}>💣</div>
-                        <div style={{ fontWeight: 'bold' }}>BOMB!</div>
+                        <div style={{ fontWeight: 'bold' }}>{t('game.bombExclaim')}</div>
                       </>
                     )}
                   </div>
@@ -309,16 +311,16 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
               }}
               style={{ marginTop: '16px' }}
             >
-              I've Viewed My Cards
+              {t('game.viewedCards')}
             </button>
           </>
         ) : G.playerClaims?.[playerID] === undefined ? (
           <>
-            <p style={{ marginBottom: '16px' }}>Your cards have been shuffled and placed face-down.</p>
+            <p style={{ marginBottom: '16px' }}>{t('game.claimDefusing')}</p>
             <div className="claim-input">
-              <h2>Submit Your Claim</h2>
+              <h2>{t('game.submitClaim')}</h2>
               <p style={{ marginBottom: '12px', color: '#666' }}>
-                Claim how many defusing wires you have (you don't have to tell the truth):
+                {t('game.howManyDefusing')}
               </p>
               <input
                 type="number"
@@ -326,7 +328,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 max={maxDefusingWires}
                 value={claimValue}
                 onChange={(e) => setClaimValue(e.target.value)}
-                placeholder={`Enter number (0 to ${maxDefusingWires})`}
+                placeholder={`0 - ${maxDefusingWires}`}
                 disabled={G.playerClaims?.[playerID] !== undefined}
               />
               <button
@@ -335,14 +337,12 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   if (!isNaN(claim) && claim >= 0 && claim <= maxDefusingWires && socket) {
                     socket.emit('submit-claim', { claim });
                     setClaimValue('');
-                  } else {
-                    alert(`Please enter a number between 0 and ${maxDefusingWires}`);
                   }
                 }}
                 disabled={G.playerClaims?.[playerID] !== undefined || !claimValue}
                 style={{ marginTop: '12px' }}
               >
-                {G.playerClaims?.[playerID] !== undefined ? 'Claim Submitted ✓' : 'Submit Claim'}
+                {t('game.submitClaim')}
               </button>
             </div>
             <div className="button-group" style={{ marginTop: '16px' }}>
@@ -355,15 +355,15 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   }
                 }}
               >
-                View Cards Again
+                {t('game.viewCardsAgain')}
               </button>
             </div>
           </>
         ) : (
           <>
-            <p style={{ marginBottom: 'clamp(8px, 2vw, 16px)' }}>Your claim has been submitted. Waiting for other players...</p>
+            <p style={{ marginBottom: 'clamp(8px, 2vw, 16px)' }}>{t('game.claimSubmitted')}</p>
             <div className="game-info">
-              <h3 style={{ marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>Players Ready to Start:</h3>
+              <h3 style={{ marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>{t('game.playersReadyToStart')}</h3>
               <div style={{ 
                 display: 'grid', 
                 gridTemplateColumns: 'repeat(auto-fit, minmax(clamp(70px, 15vw, 100px), 1fr))', 
@@ -403,14 +403,14 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                         {player.name}
                       </div>
                       {isCurrentPlayer && (
-                        <div style={{ fontSize: 'clamp(8px, 1.3vw, 10px)', color: '#666', marginTop: '4px' }}>(You)</div>
+                        <div style={{ fontSize: 'clamp(8px, 1.3vw, 10px)', color: '#666', marginTop: '4px' }}>{t('common.you')}</div>
                       )}
                       <div className="status" style={{ 
                         color: isReady ? '#4CAF50' : hasClaimed ? '#FF9800' : '#999',
                         fontWeight: isReady ? 'bold' : 'normal',
                         marginTop: 'clamp(4px, 1vw, 8px)'
                       }}>
-                        {isReady ? 'Ready' : hasClaimed ? 'Claimed' : 'Waiting'}
+                        {isReady ? t('common.ready') : hasClaimed ? t('common.claimed') : t('common.waiting')}
                       </div>
                     </div>
                   );
@@ -427,7 +427,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   }
                 }}
               >
-                View Cards Again
+                {t('game.viewCardsAgain')}
               </button>
               <button
                 className="start-game"
@@ -439,13 +439,13 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 disabled={setupReady}
                 style={{ background: setupReady ? '#4CAF50' : '#FF9800' }}
               >
-                {setupReady ? '✓ Ready to Start' : 'Ready for Round'}
+                {setupReady ? t('game.readyToStart') : t('game.readyForRound')}
               </button>
             </div>
             {allPlayersReady && (
               <div style={{ marginTop: '16px' }}>
                 <p style={{ color: '#4CAF50', fontWeight: 'bold', marginBottom: '12px' }}>
-                  All players are ready!
+                  {t('game.allPlayersReady')}
                 </p>
                 {players.length > 0 && players[0].id === playerID && (
                   <button
@@ -462,12 +462,12 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                       fontWeight: 'bold'
                     }}
                   >
-                    Start Round
+                    {t('game.startRound')}
                   </button>
                 )}
                 {players.length > 0 && players[0].id !== playerID && (
                   <p style={{ color: '#666', fontSize: '14px' }}>
-                    Waiting for host to start the game...
+                    {t('game.waitingForHost')}
                   </p>
                 )}
               </div>
@@ -496,8 +496,8 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
       console.log('GameBoard - No players, showing loading');
       return (
         <div className="card">
-          <h1>Loading Game...</h1>
-          <p>Waiting for players...</p>
+          <h1>{t('game.loadingGame')}</h1>
+          <p>{t('game.waitingForPlayers')}</p>
         </div>
       );
     }
@@ -541,16 +541,21 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
           >
             <h1>Game Over</h1>
             {isWinner ? (
-              <div className="winner-banner">You Win! 🎉</div>
+              <div className="winner-banner">{t('gameOver.victory')}</div>
             ) : (
-              <div className="loser-banner">You Lose 😢</div>
+              <div className="loser-banner">{t('gameOver.defeat')}</div>
             )}
             <div className="game-info">
               <p>
-                <strong>Winner:</strong> {G.winner === 'good' ? 'Good Team' : 'Bad Team'}
+                <strong>{t('gameOver.winner')}:</strong> {G.winner === 'good' ? t('gameOver.goodTeamWins') : t('gameOver.badTeamWins')}
               </p>
               <p>
-                <strong>Reason:</strong> {G.winReason}
+                <strong>{t('gameOver.reason')}:</strong>{' '}
+                {G.winReason?.includes('All defusing') 
+                  ? t('gameOver.reasonAllDefusing')
+                  : G.winReason?.includes('Bomb') 
+                    ? t('gameOver.reasonBombRevealed')
+                    : t('gameOver.reasonTimeOut')}
               </p>
             </div>
             <div className="button-group" style={{ marginTop: '24px' }}>
@@ -571,7 +576,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   padding: '12px 24px'
                 }}
               >
-                New Game
+                {t('gameOver.newGame')}
               </button>
               <button
                 onClick={() => setShowGameOverModal(false)}
@@ -582,37 +587,43 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   marginLeft: '12px'
                 }}
               >
-                Close
+                {t('common.close')}
               </button>
             </div>
           </div>
         </div>
       )}
 
-      <div className="card game-board-card">
-        {/* Compact header */}
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>
-          <h1 style={{ margin: 0 }}>Round {G.currentRound || 1}</h1>
-          <div style={{ display: 'flex', gap: 'clamp(6px, 1.5vw, 12px)', alignItems: 'center' }}>
-            {isMyTurn && G.allClaimsReady && (
-              <div style={{ 
-                fontSize: 'clamp(10px, 1.8vw, 14px)', 
-                fontWeight: 'bold', 
-                color: '#f44336',
-                background: '#ffebee',
-                padding: 'clamp(2px, 0.5vw, 4px) clamp(4px, 1vw, 8px)',
-                borderRadius: '4px'
-              }}>
-                YOUR TURN
-              </div>
-            )}
+      <div className="card game-board-card" style={{ marginTop: 'clamp(30px, 5vw, 50px)' }}>
+        {/* Your Turn indicator - centered at top */}
+        {isMyTurn && G.allClaimsReady && (
+          <div style={{ 
+            textAlign: 'center',
+            marginBottom: 'clamp(8px, 1.5vw, 12px)',
+          }}>
+            <span style={{ 
+              fontSize: 'clamp(12px, 2.5vw, 18px)', 
+              fontWeight: 'bold', 
+              color: '#f44336',
+              background: '#ffebee',
+              padding: 'clamp(4px, 1vw, 8px) clamp(12px, 2vw, 20px)',
+              borderRadius: '6px',
+              display: 'inline-block',
+            }}>
+              🎯 {t('game.yourTurn')}
+            </span>
           </div>
+        )}
+        
+        {/* Round header - left aligned */}
+        <div style={{ marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>
+          <h1 style={{ margin: 0 }}>{t('common.round')} {G.currentRound || 1}</h1>
         </div>
 
         {/* Turn order - compact */}
         {G.turnOrder && G.turnOrder.length > 0 && (
           <div className="turn-order-container" style={{ marginBottom: 'clamp(6px, 1.5vw, 12px)' }}>
-            <strong>Turn:</strong>{' '}
+            <strong>{t('common.turn')}:</strong>{' '}
             <span style={{ display: 'flex', alignItems: 'center', gap: 'clamp(2px, 0.5vw, 4px)', flexWrap: 'wrap', marginTop: '4px' }}>
             {G.turnOrder.map((pid, idx) => {
               const player = players.find((p) => p.id === pid);
@@ -703,10 +714,10 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 {/* Player name and claim */}
                 <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: 'clamp(4px, 1vw, 8px)' }}>
                   <div className="player-name" style={{ fontWeight: 'bold', color: '#333' }}>
-                    {player.name} {player.id === playerID && '(You)'}
+                    {player.name} {player.id === playerID && t('common.you')}
                   </div>
                   <div className="claim-badge" style={{ color: '#666', fontWeight: 'bold', background: 'rgba(255,255,255,0.5)', borderRadius: '4px' }}>
-                    Claim: {playerClaim}
+                    {t('game.claim')} {playerClaim}
                   </div>
                 </div>
 
@@ -764,19 +775,19 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                             {revealedWire.wireType === 'defusing' && (
                               <>
                                 <div style={{ fontSize: 'clamp(12px, 2.5vw, 16px)', marginBottom: '2px' }}>✓</div>
-                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>DEF</div>
+                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>{t('game.def')}</div>
                               </>
                             )}
                             {revealedWire.wireType === 'safe' && (
                               <>
                                 <div style={{ fontSize: 'clamp(12px, 2.5vw, 16px)', marginBottom: '2px' }}>○</div>
-                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>SAFE</div>
+                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>{t('game.safe')}</div>
                               </>
                             )}
                             {revealedWire.wireType === 'bomb' && (
                               <>
                                 <div style={{ fontSize: 'clamp(14px, 3vw, 20px)', marginBottom: '2px' }}>💣</div>
-                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>BOMB</div>
+                                <div style={{ fontSize: 'clamp(6px, 1.2vw, 8px)', fontWeight: 'bold' }}>{t('game.bomb')}</div>
                               </>
                             )}
                           </>
@@ -824,10 +835,9 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
               }}
               onClick={(e) => e.stopPropagation()}
             >
-              <h2>Confirm Cut</h2>
+              <h2>{t('game.confirmCut')}</h2>
               <p>
-                Are you sure you want to cut this card from{' '}
-                <strong>{players.find((p) => p.id === pendingCut.targetPlayerId)?.name}</strong>?
+                {t('game.areYouSureCut', { playerName: players.find((p) => p.id === pendingCut.targetPlayerId)?.name })}
               </p>
               <div className="button-group" style={{ marginTop: '20px' }}>
                 <button
@@ -843,7 +853,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   }}
                   style={{ background: '#4CAF50', color: 'white' }}
                 >
-                  Yes
+                  {t('game.confirm')}
                 </button>
                 <button
                   onClick={() => {
@@ -852,7 +862,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                   }}
                   style={{ background: '#666', color: 'white' }}
                 >
-                  No
+                  {t('game.cancel')}
                 </button>
               </div>
             </div>
@@ -863,7 +873,7 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
         {G.roundEnded && (
           <div style={{ marginTop: '12px', padding: '12px', background: '#f5f5f5', borderRadius: '8px', fontSize: '12px' }}>
             <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
-              <strong>Round {G.currentRound} Ended</strong>
+              <strong>{t('common.round')} {G.currentRound} {t('game.roundEnded')}</strong>
               <div style={{ display: 'flex', gap: '8px', fontSize: '11px' }}>
                 {players.map((player) => {
                   const isReady = G.roundReady?.[player.id] || false;
@@ -889,11 +899,11 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
                 width: '100%'
               }}
             >
-              {G.roundReady?.[playerID] ? '✓ Ready for Next Round' : 'Next Round'}
+              {G.roundReady?.[playerID] ? t('game.readyForNextRound') : t('game.nextRound')}
             </button>
             {players.length > 0 && players.every((p) => G.roundReady?.[p.id] === true) && (
               <p style={{ marginTop: '8px', color: '#4CAF50', fontWeight: 'bold', fontSize: '11px', textAlign: 'center' }}>
-                All ready! Reshuffling...
+                {t('game.allReadyReshuffling')}
               </p>
             )}
           </div>
