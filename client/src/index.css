@@ -413,3 +413,44 @@ h2 {
     overflow: auto;
   }
 }
+
+/* ===========================================
+   HOW TO PLAY MODAL - RESPONSIVE SIZING
+   =========================================== */
+
+/* Mobile/Phone - screens narrower than 768px */
+@media (max-width: 767px) {
+  .how-to-play-modal {
+    transform: scale(1) !important;
+    max-width: 90vw !important;
+    max-height: 75vh !important;
+    padding: 16px !important;
+    width: 90vw !important;
+  }
+  
+  .how-to-play-modal h2 {
+    font-size: 18px !important;
+    margin-bottom: 12px !important;
+  }
+  
+  .how-to-play-modal h3 {
+    font-size: 14px !important;
+    margin-top: 14px !important;
+    margin-bottom: 6px !important;
+  }
+  
+  .how-to-play-modal p,
+  .how-to-play-modal li,
+  .how-to-play-modal td,
+  .how-to-play-modal th {
+    font-size: 12px !important;
+  }
+  
+  .how-to-play-modal table {
+    font-size: 11px !important;
+  }
+  
+  .how-to-play-modal ul {
+    padding-left: 16px !important;
+  }
+}

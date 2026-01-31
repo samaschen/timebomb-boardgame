@@ -1,5 +1,106 @@
 import React, { useState, useEffect } from 'react';
 
+// How to Play content component
+const HowToPlayContent = () => (
+  <div style={{ textAlign: 'left', fontSize: '14px', lineHeight: '1.6' }}>
+    <h2 style={{ marginBottom: '16px', textAlign: 'center' }}>🎮 How to Play</h2>
+    
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>Overview</h3>
+    <p style={{ marginBottom: '12px' }}>
+      Time Bomb is a social deduction game where players are secretly divided into two teams:
+    </p>
+    <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
+      <li><strong>Good Team (SWAT)</strong>: Find all the defusing wires before time runs out</li>
+      <li><strong>Bad Team (Terrorists)</strong>: Prevent the Good Team from winning, ideally by triggering the bomb</li>
+    </ul>
+    <p style={{ marginBottom: '16px', fontStyle: 'italic' }}>
+      Players don't know each other's roles. Communication, bluffing, and deduction are key!
+    </p>
+
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>👥 Teams & Roles</h3>
+    <p style={{ marginBottom: '8px' }}>
+      Players are secretly divided into two teams — <em>you won't know who's on which team!</em>
+    </p>
+    <table style={{ width: '100%', marginBottom: '12px', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <thead>
+        <tr style={{ background: '#f5f5f5' }}>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Players</th>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'center' }}>Distribution</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>4</td><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>2🟢2🔴 or 3🟢1🔴</td></tr>
+        <tr><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>5</td><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>3🟢2🔴</td></tr>
+        <tr><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>6</td><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>4🟢2🔴</td></tr>
+        <tr><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>7</td><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>4🟢3🔴 or 5🟢2🔴</td></tr>
+        <tr><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>8</td><td style={{ padding: '6px', border: '1px solid #ddd', textAlign: 'center' }}>5🟢3🔴</td></tr>
+      </tbody>
+    </table>
+
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>🃏 The Cards</h3>
+    <p style={{ marginBottom: '8px' }}>For <strong>X players</strong>, the deck contains <strong>5X cards</strong>:</p>
+    <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
+      <li>🟢 <strong>X Defusing Wires</strong></li>
+      <li>💣 <strong>1 Bomb</strong></li>
+      <li>⚪ <strong>4X - 1 Safe Wires</strong></li>
+    </ul>
+    <p style={{ marginBottom: '16px' }}>
+      Each player starts with <strong>5 cards</strong> (Round 1), then <strong>4 → 3 → 2</strong> in later rounds.
+    </p>
+
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>🔄 Game Flow</h3>
+    
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>Setup Phase</p>
+    <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
+      <li>View your secret role and cards</li>
+      <li>Claim how many defusing wires you have — everyone sees your claim <em>(you can lie!)</em></li>
+      <li>Click "Ready" when done</li>
+    </ul>
+
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>Playing Phase</p>
+    <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
+      <li>Players take turns in random order (1 turn each per round)</li>
+      <li>On your turn: cut one wire from another player <em>(not yourself!)</em></li>
+      <li>The wire is revealed to everyone</li>
+    </ul>
+
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>Between Rounds</p>
+    <ul style={{ marginBottom: '16px', paddingLeft: '20px' }}>
+      <li>Unrevealed cards are reshuffled and redealt (1 fewer card per player)</li>
+      <li>Found defusing wires stay revealed permanently</li>
+      <li>The bomb stays hidden if not yet cut</li>
+    </ul>
+
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>🏆 Win Conditions</h3>
+    <table style={{ width: '100%', marginBottom: '16px', borderCollapse: 'collapse', fontSize: '13px' }}>
+      <thead>
+        <tr style={{ background: '#f5f5f5' }}>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>Team</th>
+          <th style={{ padding: '8px', border: '1px solid #ddd', textAlign: 'left' }}>How to Win</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>🟢 Good Team</td>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>Reveal ALL defusing wires before Round 4 ends</td>
+        </tr>
+        <tr>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>🔴 Bad Team</td>
+          <td style={{ padding: '6px', border: '1px solid #ddd' }}>Bomb is revealed OR Round 4 ends without all defusing wires</td>
+        </tr>
+      </tbody>
+    </table>
+
+    <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>💡 Tips</h3>
+    <ul style={{ paddingLeft: '20px' }}>
+      <li>🔍 Watch claims closely — who's lying?</li>
+      <li>🤔 Good Team players may also lie if they have the 💣 in their hand that round</li>
+      <li>🤔 Bad Team players may cut defusing wires to blend in, cut safe wires to stall, or reveal their identity at the "right" moment</li>
+      <li>🗣️ Communicate, but trust wisely!</li>
+    </ul>
+  </div>
+);
+
 function Lobby({
   socket,
   connected,
@@ -14,6 +115,7 @@ function Lobby({
   onJoinRoom,
 }) {
   const [ready, setReady] = useState(false);
+  const [showHowToPlay, setShowHowToPlay] = useState(false);
   const isHost = players.length > 0 && players[0].id === playerID;
 
   useEffect(() => {
@@ -42,6 +144,9 @@ function Lobby({
     return (
       <div className="card">
         <h1>Time Bomb Game</h1>
+        <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px', fontSize: '14px' }}>
+          Welcome to the Time Bomb board game! 💣🎉🤩
+        </p>
         {!connected && (
           <p style={{ color: '#ff9800', marginBottom: '16px' }}>
             Connecting to server... {socket ? '(Attempting connection)' : '(Initializing)'}
@@ -120,7 +225,80 @@ function Lobby({
 
   // Show waiting room
   return (
-    <div className="card">
+    <div className="card" style={{ position: 'relative' }}>
+      {/* How to Play button - top right corner */}
+      <button
+        onClick={() => setShowHowToPlay(true)}
+        style={{
+          position: 'absolute',
+          top: '12px',
+          right: '12px',
+          padding: '8px 12px',
+          fontSize: '12px',
+          background: '#9c27b0',
+          color: 'white',
+          border: 'none',
+          borderRadius: '6px',
+          cursor: 'pointer',
+        }}
+      >
+        📖 How to Play
+      </button>
+
+      {/* How to Play Modal */}
+      {showHowToPlay && (
+        <div
+          style={{
+            position: 'fixed',
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            background: 'rgba(0, 0, 0, 0.7)',
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            zIndex: 1000,
+            padding: '20px',
+          }}
+          onClick={() => setShowHowToPlay(false)}
+        >
+          <div
+            className="how-to-play-modal"
+            style={{
+              background: 'white',
+              borderRadius: '20px',
+              padding: '24px',
+              maxWidth: '950px',
+              maxHeight: '56vh',
+              overflow: 'auto',
+              boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              transform: 'scale(0.5)',
+              transformOrigin: 'center center',
+            }}
+            onClick={(e) => e.stopPropagation()}
+          >
+            <HowToPlayContent />
+            <div style={{ textAlign: 'center', marginTop: '20px' }}>
+              <button
+                onClick={() => setShowHowToPlay(false)}
+                style={{
+                  padding: '10px 24px',
+                  fontSize: '14px',
+                  background: '#667eea',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: '6px',
+                  cursor: 'pointer',
+                }}
+              >
+                Got it!
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
       <h1>Waiting Room</h1>
       <div className="game-info">
         <p><strong>Room Code:</strong> {gameState?.matchID || roomCode}</p>

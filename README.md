@@ -122,92 +122,71 @@ Time Bomb is a social deduction game where players are secretly divided into two
 
 Players don't know each other's roles. Each round, players take turns cutting wires from other players' hands. Communication, bluffing, and deduction are key!
 
-### Game Flow
+### 👥 Teams & Roles
 
-#### 1. Create or Join a Room
+Players are secretly divided into two teams — *you won't know who's on which team!*
+
+| 🟢 Good Team (SWAT) | 🔴 Bad Team (Terrorists) |
+|---------------------|--------------------------|
+| Find all defusing wires to win | Stop them or detonate the bomb |
+
+**Role distribution by player count:**
+
+| Players | Distribution |
+|:-------:|:-------:|
+| 4 | 2🟢2🔴 or 3🟢1🔴 | 
+| 5 | 3🟢2🔴 |
+| 6 | 4🟢2🔴 |
+| 7 | 4🟢3🔴 or 5🟢2🔴 |
+| 8 | 5🟢3🔴 |
+
+### 🃏 The Cards
+
+For **X players**, the deck contains **5X cards**:
+- 🟢 **X Defusing Wires**
+- 💣 **1 Bomb**
+- ⚪ **4X - 1 Safe Wires**
+
+Each player starts with **5 cards** (Round 1), then **4 → 3 → 2** in later rounds.
+
+### 🔄 Game Flow
+
+#### 1️⃣ Create or Join a Room
 - **Create**: Enter your name, leave room code empty, click "Create Room"
 - **Join**: Enter your name and the room code (or use a shared link)
 - Share the room code with friends (4-8 players required)
 
-#### 2. Lobby
+#### 2️⃣ Lobby
 - All players click **"Click to Ready"** when ready
 - The host (room creator) clicks **"Start Game"** once everyone is ready
 
-#### 3. Setup Phase (each round)
-- View your **secret role** (Good Team or Bad Team)
-- View your **wire cards** (5 cards in Round 1, then 4, 3, 2 in subsequent rounds)
-- **Claim** how many defusing wires you have (you can lie!)
-- Click **"Ready for Turn"** when done
-- Host clicks **"Start Turn"** to begin the round
+#### 3️⃣ Setup Phase
+- View your secret role and cards
+- Claim how many defusing wires you have — everyone sees your claim *(you can lie!)*
+- Click "Ready" when done
 
-#### 4. Playing Phase
-Players take turns in a randomized order. On your turn:
-1. Choose another player's face-down card to **cut**
-2. Confirm your choice in the popup
-3. The wire is revealed to everyone:
-   - **Safe wire**: Nothing happens, next player's turn
-   - **Defusing wire**: Added to the "Defusing wires found" section (progress toward Good Team win)
-   - **Bomb**: Game ends immediately — **Bad Team wins!**
+#### 4️⃣ Playing Phase
+- Players take turns in random order (1 turn each per round)
+- On your turn: cut one wire from another player *(not yourself!)*
+- The wire is revealed to everyone
 
-After all players have taken one turn, the round ends.
+#### 5️⃣ Between Rounds
+- Unrevealed cards are reshuffled and redealt (1 fewer card per player)
+- Found defusing wires stay revealed permanently
+- The bomb stays hidden if not yet cut
 
-#### 5. Between Rounds
-- All **face-down** cards are collected and reshuffled
-- Already-revealed defusing wires are **permanently removed** (they count toward the win condition)
-- The **bomb** stays in the deck if not yet revealed
-- Each player receives **one fewer card** than the previous round
-- Players re-enter their claims for the new round
-- A new random turn order is generated
+### 🏆 Win Conditions
 
-#### 6. Win Conditions
-| Winner | Condition |
-|--------|-----------|
-| **Good Team** | All defusing wires (equal to player count) are revealed |
-| **Bad Team** | The bomb is revealed, OR Round 4 ends without all defusing wires found |
+| Team | How to Win |
+|------|------------|
+| 🟢 Good Team | Reveal ALL defusing wires before Round 4 ends |
+| 🔴 Bad Team | Bomb is revealed OR Round 4 ends without all defusing wires |
 
-### Strategy Tips
-
-- **Good Team**: Share information honestly, identify suspicious players, and coordinate to find defusing wires quickly
-- **Bad Team**: Blend in, mislead others, protect the bomb, and stall until Round 4
-- **Claims are public but unverified** — use them to deduce who's lying
-- **Watch the turn order** — Bad Team members may try to cut "safe" cards to avoid progress
-
----
-
-## Game Rules Reference
-
-### Role Distribution
-
-| Players | Good Team | Bad Team |
-|---------|-----------|----------|
-| 4 | 3 or 2 | 1 or 2 (random) |
-| 5 | 3 | 2 |
-| 6 | 4 | 2 |
-| 7 | 4 or 5 | 3 or 2 (random) |
-| 8 | 5 | 3 |
-
-### Wire Deck Composition
-
-For X players:
-- **X** defusing wires
-- **1** bomb
-- **4X - X - 1** = **3X - 1** safe wires
-- **Total**: 4X cards
-
-### Cards Per Player Per Round
-
-| Round | Cards per player |
-|-------|------------------|
-| 1 | 5 |
-| 2 | 4 |
-| 3 | 3 |
-| 4 | 2 |
-
-### Turn Order
-
-- Each round has a **new random turn order**
-- Every player gets exactly **1 turn** per round
-- You **cannot cut your own cards**
+### 💡 Tips
+- 🔍 Watch claims closely — who's lying?
+- 🤔 Good Team players may also lie if they have the 💣 in their hand that round
+- 🤔 Bad Team players may cut defusing wires to blend in, cut safe wires to stall, or reveal their identity at the "right" moment (they just need to detonate the 💣!)
+- 🗣️ Communicate, but trust wisely!
 
 ---
 
