@@ -51,6 +51,19 @@ const HowToPlayContent = ({ t }) => (
 
     <h3 style={{ marginTop: '20px', marginBottom: '8px' }}>{t('howToPlay.gameFlow')}</h3>
     
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>{t('howToPlay.createJoinRoom')}</p>
+    <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
+      <li><strong>{t('howToPlay.createLabel')}:</strong> {t('howToPlay.createRoomStep')}</li>
+      <li><strong>{t('howToPlay.joinLabel')}:</strong> {t('howToPlay.joinRoomStep')}</li>
+      <li>{t('howToPlay.shareCodeStep')}</li>
+    </ul>
+
+    <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>{t('howToPlay.lobbyPhase')}</p>
+    <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
+      <li>{t('howToPlay.lobbyStep1')}</li>
+      <li>{t('howToPlay.lobbyStep2')}</li>
+    </ul>
+
     <p style={{ fontWeight: '600', marginTop: '12px', marginBottom: '4px' }}>{t('howToPlay.setupPhase')}</p>
     <ul style={{ marginBottom: '12px', paddingLeft: '20px' }}>
       <li>{t('howToPlay.setupStep1')}</li>
@@ -146,10 +159,77 @@ function Lobby({
   if (!gameState || players.length === 0) {
     return (
       <div className="card">
-        <h1>{t('lobby.title')}</h1>
-        <p style={{ textAlign: 'center', color: '#666', marginBottom: '16px', fontSize: '14px' }}>
+        {/* Title row with How to Play button */}
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+          <h1 style={{ margin: 0 }}>{t('lobby.title')}</h1>
+          <button
+            onClick={() => setShowHowToPlay(true)}
+            style={{
+              padding: '6px 10px',
+              fontSize: 'clamp(10px, 1.5vw, 12px)',
+              background: '#9c27b0',
+              color: 'white',
+              border: 'none',
+              borderRadius: '6px',
+              cursor: 'pointer',
+              flexShrink: 0,
+            }}
+          >
+            {t('lobby.howToPlay')}
+          </button>
+        </div>
+        <p style={{ textAlign: 'left', color: '#666', marginBottom: '16px', fontSize: '14px' }}>
           {t('lobby.welcome')}
         </p>
+
+        {/* How to Play Modal */}
+        {showHowToPlay && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              background: 'rgba(0, 0, 0, 0.7)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '20px',
+            }}
+            onClick={() => setShowHowToPlay(false)}
+          >
+            <div
+              className="how-to-play-modal"
+              style={{
+                background: 'white',
+                borderRadius: '12px',
+                overflow: 'auto',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)',
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              <HowToPlayContent t={t} />
+              <div style={{ textAlign: 'center', marginTop: '20px' }}>
+                <button
+                  onClick={() => setShowHowToPlay(false)}
+                  style={{
+                    padding: '10px 24px',
+                    fontSize: '14px',
+                    background: '#667eea',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    cursor: 'pointer',
+                  }}
+                >
+                  {t('common.gotIt')}
+                </button>
+              </div>
+            </div>
+          </div>
+        )}
         {!connected && (
           <p style={{ color: '#ff9800', marginBottom: '16px' }}>
             {t('common.connecting')} {socket ? t('lobby.attemptingConnection') : t('lobby.initializing')}
