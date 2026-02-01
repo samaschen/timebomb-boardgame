@@ -578,17 +578,6 @@ function GameBoard({ socket, gameState, players, playerID, playerName, onReturnT
               >
                 {t('gameOver.newGame')}
               </button>
-              <button
-                onClick={() => setShowGameOverModal(false)}
-                style={{ 
-                  background: '#666',
-                  fontSize: '16px',
-                  padding: '12px 24px',
-                  marginLeft: '12px'
-                }}
-              >
-                {t('common.close')}
-              </button>
             </div>
           </div>
         </div>
